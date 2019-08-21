@@ -312,6 +312,8 @@ static id<SDImageLoader> _defaultImageLoader;
 }
 
 // Store cache process
+// 获取当前的图片缓存到本地
+// Step 1
 - (void)callStoreCacheProcessForOperation:(nonnull SDWebImageCombinedOperation *)operation
                                       url:(nonnull NSURL *)url
                                   options:(SDWebImageOptions)options
@@ -340,6 +342,7 @@ static id<SDImageLoader> _defaultImageLoader;
     BOOL shouldCacheOriginal = downloadedImage && finished;
     
     // if available, store original image to cache
+    // 缓存原图
     if (shouldCacheOriginal) {
         // normally use the store cache type, but if target image is transformed, use original store cache type instead
         SDImageCacheType targetStoreCacheType = shouldTransformImage ? originalStoreCacheType : storeCacheType;
@@ -347,6 +350,8 @@ static id<SDImageLoader> _defaultImageLoader;
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
                 @autoreleasepool {
                     NSData *cacheData = [cacheSerializer cacheDataWithImage:downloadedImage originalData:downloadedData imageURL:url];
+                    
+                    // Store cache image
                     [self.imageCache storeImage:downloadedImage imageData:cacheData forKey:key cacheType:targetStoreCacheType completion:nil];
                 }
             });
@@ -355,6 +360,7 @@ static id<SDImageLoader> _defaultImageLoader;
         }
     }
     // if available, store transformed image to cache
+    // 对当前的图片进行转换
     if (shouldTransformImage) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
             @autoreleasepool {

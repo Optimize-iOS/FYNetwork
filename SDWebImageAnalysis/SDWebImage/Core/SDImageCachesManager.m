@@ -84,6 +84,8 @@
 
 #pragma mark - SDImageCache
 
+// Cache Query 缓存资源查找
+// Step 3
 - (id<SDWebImageOperation>)queryImageForKey:(NSString *)key options:(SDWebImageOptions)options context:(SDWebImageContext *)context completion:(SDImageCacheQueryCompletionBlock)completionBlock {
     if (!key) {
         return nil;
@@ -126,6 +128,7 @@
     }
 }
 
+//Step 2
 - (void)storeImage:(UIImage *)image imageData:(NSData *)imageData forKey:(NSString *)key cacheType:(SDImageCacheType)cacheType completion:(SDWebImageNoParamsBlock)completionBlock {
     if (!key) {
         return;
@@ -139,23 +142,23 @@
         return;
     }
     switch (self.storeOperationPolicy) {
-        case SDImageCachesManagerOperationPolicyHighestOnly: {
+        case SDImageCachesManagerOperationPolicyHighestOnly: {//高优先级获取当前缓存数组 last
             id<SDImageCache> cache = caches.lastObject;
             [cache storeImage:image imageData:imageData forKey:key cacheType:cacheType completion:completionBlock];
         }
             break;
-        case SDImageCachesManagerOperationPolicyLowestOnly: {
+        case SDImageCachesManagerOperationPolicyLowestOnly: {//低优先级就是按照添加缓存
             id<SDImageCache> cache = caches.firstObject;
             [cache storeImage:image imageData:imageData forKey:key cacheType:cacheType completion:completionBlock];
         }
             break;
-        case SDImageCachesManagerOperationPolicyConcurrent: {
+        case SDImageCachesManagerOperationPolicyConcurrent: {//并发
             SDImageCachesManagerOperation *operation = [SDImageCachesManagerOperation new];
             [operation beginWithTotalCount:caches.count];
             [self concurrentStoreImage:image imageData:imageData forKey:key cacheType:cacheType completion:completionBlock enumerator:caches.reverseObjectEnumerator operation:operation];
         }
             break;
-        case SDImageCachesManagerOperationPolicySerial: {
+        case SDImageCachesManagerOperationPolicySerial: {//串行递归
             [self serialStoreImage:image imageData:imageData forKey:key cacheType:cacheType completion:completionBlock enumerator:caches.reverseObjectEnumerator];
         }
             break;
@@ -279,6 +282,7 @@
 
 #pragma mark - Concurrent Operation
 
+//Step 3.2
 - (void)concurrentQueryImageForKey:(NSString *)key options:(SDWebImageOptions)options context:(SDWebImageContext *)context completion:(SDImageCacheQueryCompletionBlock)completionBlock enumerator:(NSEnumerator<id<SDImageCache>> *)enumerator operation:(SDImageCachesManagerOperation *)operation {
     NSParameterAssert(enumerator);
     NSParameterAssert(operation);
@@ -312,6 +316,7 @@
     }
 }
 
+//Step 2.2 concurrent 并发
 - (void)concurrentStoreImage:(UIImage *)image imageData:(NSData *)imageData forKey:(NSString *)key cacheType:(SDImageCacheType)cacheType completion:(SDWebImageNoParamsBlock)completionBlock enumerator:(NSEnumerator<id<SDImageCache>> *)enumerator operation:(SDImageCachesManagerOperation *)operation {
     NSParameterAssert(enumerator);
     NSParameterAssert(operation);
@@ -422,6 +427,7 @@
 
 #pragma mark - Serial Operation
 
+//Step 3.3
 - (void)serialQueryImageForKey:(NSString *)key options:(SDWebImageOptions)options context:(SDWebImageContext *)context completion:(SDImageCacheQueryCompletionBlock)completionBlock enumerator:(NSEnumerator<id<SDImageCache>> *)enumerator operation:(SDImageCachesManagerOperation *)operation {
     NSParameterAssert(enumerator);
     NSParameterAssert(operation);
@@ -459,6 +465,7 @@
     }];
 }
 
+//Step 2.3 serial 递归执行
 - (void)serialStoreImage:(UIImage *)image imageData:(NSData *)imageData forKey:(NSString *)key cacheType:(SDImageCacheType)cacheType completion:(SDWebImageNoParamsBlock)completionBlock enumerator:(NSEnumerator<id<SDImageCache>> *)enumerator {
     NSParameterAssert(enumerator);
     id<SDImageCache> cache = enumerator.nextObject;

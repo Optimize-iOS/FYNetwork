@@ -63,6 +63,7 @@
     SD_UNLOCK(_pendingCountLock);
 }
 
+//采用 KVO 形式记录 Operation 的状态 
 - (void)setFinished:(BOOL)finished {
     [self willChangeValueForKey:@"isFinished"];
     _finished = finished;

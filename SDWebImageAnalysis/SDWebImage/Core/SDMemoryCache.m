@@ -59,6 +59,8 @@ static void * SDMemoryCacheContext = &SDMemoryCacheContext;
     [config addObserver:self forKeyPath:NSStringFromSelector(@selector(maxMemoryCount)) options:0 context:SDMemoryCacheContext];
     
 #if SD_UIKIT
+    //在 UIKit 使用 Maptable 来初始化对应的 Strong --> Weak Memory 类型
+    // TODO 
     self.weakCache = [[NSMapTable alloc] initWithKeyOptions:NSPointerFunctionsStrongMemory valueOptions:NSPointerFunctionsWeakMemory capacity:0];
     self.weakCacheLock = dispatch_semaphore_create(1);
     
@@ -139,6 +141,7 @@ static void * SDMemoryCacheContext = &SDMemoryCacheContext;
 
 #pragma mark - KVO
 
+// KVO 的实现在当前类中添加多个需要判断当前 keyPath 类型
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
     if (context == SDMemoryCacheContext) {
         if ([keyPath isEqualToString:NSStringFromSelector(@selector(maxMemoryCost))]) {

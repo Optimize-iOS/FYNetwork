@@ -11,10 +11,10 @@
 
 /// Policy for cache operation
 typedef NS_ENUM(NSUInteger, SDImageCachesManagerOperationPolicy) {
-    SDImageCachesManagerOperationPolicySerial, // process all caches serially (from the highest priority to the lowest priority cache by order)
-    SDImageCachesManagerOperationPolicyConcurrent, // process all caches concurrently
-    SDImageCachesManagerOperationPolicyHighestOnly, // process the highest priority cache only
-    SDImageCachesManagerOperationPolicyLowestOnly // process the lowest priority cache only
+    SDImageCachesManagerOperationPolicySerial, // process all caches serially (from the highest priority to the lowest priority cache by order) 高优先级到低优先级顺序处理缓存
+    SDImageCachesManagerOperationPolicyConcurrent, // process all caches concurrently 并发
+    SDImageCachesManagerOperationPolicyHighestOnly, // process the highest priority cache only 处理高优先级
+    SDImageCachesManagerOperationPolicyLowestOnly // process the lowest priority cache only 处理低优先级
 };
 
 /**

@@ -56,6 +56,7 @@
     return exists;
 }
 
+//根据对应 key 然后根据当前根目录情况初始化当前
 - (NSData *)dataForKey:(NSString *)key {
     NSParameterAssert(key);
     NSString *filePath = [self cachePathForKey:key];
@@ -86,6 +87,7 @@
     // transform to NSUrl
     NSURL *fileURL = [NSURL fileURLWithPath:cachePathForKey];
     
+    ///根据 image data 把资源写入到磁盘 File 文件夹位置
     [data writeToURL:fileURL options:self.config.diskCacheWritingOptions error:nil];
     
     // disable iCloud backup

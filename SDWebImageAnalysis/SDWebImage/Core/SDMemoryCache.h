@@ -69,6 +69,7 @@
 
 /**
  A memory cache which auto purge the cache on memory warning and support weak cache.
+ 采用 Cache 的泛化来初始化来实现 Memory 内存缓存 
  */
 @interface SDMemoryCache <KeyType, ObjectType> : NSCache <KeyType, ObjectType> <SDMemoryCache>
 

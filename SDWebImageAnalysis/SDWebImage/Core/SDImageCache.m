@@ -60,6 +60,7 @@
         NSAssert(ns, @"Cache namespace should not be nil");
         
         // Create IO serial queue
+        ///创建当前在保存在 磁盘中 IO Queue
         _ioQueue = dispatch_queue_create("com.hackemist.SDImageCache", DISPATCH_QUEUE_SERIAL);
         
         if (!config) {
@@ -189,11 +190,13 @@
                 if (!data && image) {
                     // If we do not have any data to detect image format, check whether it contains alpha channel to use PNG or JPEG format
                     SDImageFormat format;
+                    ///根据当前 image 的透明度来判断图片类型
                     if ([SDImageCoderHelper CGImageContainsAlpha:image.CGImage]) {
                         format = SDImageFormatPNG;
                     } else {
                         format = SDImageFormatJPEG;
                     }
+                    //TODO
                     data = [[SDImageCodersManager sharedManager] encodedDataWithImage:image format:format options:nil];
                 }
                 [self _storeImageDataToDisk:data forKey:key];
@@ -361,6 +364,7 @@
 }
 
 //查找当前 缓存的图片
+// Step 3.1.1
 - (nullable NSOperation *)queryCacheOperationForKey:(nullable NSString *)key options:(SDImageCacheOptions)options context:(nullable SDWebImageContext *)context done:(nullable SDImageCacheQueryCompletionBlock)doneBlock {
     if (!key) {
         if (doneBlock) {
@@ -377,6 +381,7 @@
     }
     
     // First check the in-memory cache...
+    // Memory cache image 内存缓存图片
     UIImage *image = [self imageFromMemoryCacheForKey:key];
     
     if (image) {
@@ -399,7 +404,8 @@
             }
         }
     }
-
+    
+    //Memory cache image
     BOOL shouldQueryMemoryOnly = (image && !(options & SDImageCacheQueryMemoryData));
     if (shouldQueryMemoryOnly) {
         if (doneBlock) {
@@ -424,6 +430,7 @@
         }
         
         @autoreleasepool {
+            //Disk image 磁盘缓存图片 
             NSData *diskData = [self diskImageDataBySearchingAllPathsForKey:key];
             UIImage *diskImage;
             SDImageCacheType cacheType = SDImageCacheTypeNone;
@@ -634,6 +641,7 @@
 
 #pragma mark - SDImageCache
 
+//Step 3.1 
 - (id<SDWebImageOperation>)queryImageForKey:(NSString *)key options:(SDWebImageOptions)options context:(nullable SDWebImageContext *)context completion:(nullable SDImageCacheQueryCompletionBlock)completionBlock {
     SDImageCacheOptions cacheOptions = 0;
     if (options & SDWebImageQueryMemoryData) cacheOptions |= SDImageCacheQueryMemoryData;
@@ -648,6 +656,8 @@
     return [self queryCacheOperationForKey:key options:cacheOptions context:context done:completionBlock];
 }
 
+//Step 2.1
+///实现方式是 memory || disk
 - (void)storeImage:(UIImage *)image imageData:(NSData *)imageData forKey:(nullable NSString *)key cacheType:(SDImageCacheType)cacheType completion:(nullable SDWebImageNoParamsBlock)completionBlock {
     switch (cacheType) {
         case SDImageCacheTypeNone: {

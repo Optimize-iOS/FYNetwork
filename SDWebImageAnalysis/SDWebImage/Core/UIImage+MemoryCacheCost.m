@@ -28,7 +28,7 @@ FOUNDATION_STATIC_INLINE NSUInteger SDMemoryCacheCostForImage(UIImage *image) {
 
 @implementation UIImage (MemoryCacheCost)
 
-- (NSUInteger)sd_memoryCost {
+- (NSUInteger)sd_memoryCost { //根据设置和当前图片的大小 
     NSNumber *value = objc_getAssociatedObject(self, @selector(sd_memoryCost));
     NSUInteger memoryCost;
     if (value != nil) {

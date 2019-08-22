@@ -24,7 +24,8 @@ static NSString * const PINCacheSharedName = @"PINCacheShared";
     return [self initWithName:@""];
 }
 
-- (instancetype)initWithName:(NSString *)name
+//默认缓存保存在 Cache 目录
+-(instancetype)initWithName:(NSString *)name
 {
     return [self initWithName:name rootPath:[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) firstObject]];
 }
@@ -63,7 +64,11 @@ static NSString * const PINCacheSharedName = @"PINCacheShared";
         _name = [name copy];
       
         //10 may actually be a bit high, but currently much of our threads are blocked on empyting the trash. Until we can resolve that, lets bump this up.
+        //
+        ///初始化并发线程实现 10 任务
         _operationQueue = [[PINOperationQueue alloc] initWithMaxConcurrentOperations:10];
+        //
+        ///
         _diskCache = [[PINDiskCache alloc] initWithName:_name
                                                  prefix:PINDiskCachePrefix
                                                rootPath:rootPath
@@ -73,6 +78,8 @@ static NSString * const PINCacheSharedName = @"PINCacheShared";
                                              keyDecoder:keyDecoder
                                          operationQueue:_operationQueue
                                                ttlCache:ttlCache];
+        //
+        ///
         _memoryCache = [[PINMemoryCache alloc] initWithName:_name operationQueue:_operationQueue ttlCache:ttlCache];
     }
     return self;
@@ -97,12 +104,14 @@ static NSString * const PINCacheSharedName = @"PINCacheShared";
 
 #pragma mark - Public Asynchronous Methods -
 
+///👇 方法在 PINCaching 协议中声明
 - (void)containsObjectForKeyAsync:(NSString *)key completion:(PINCacheObjectContainmentBlock)block
 {
     if (!key || !block) {
         return;
     }
-  
+
+    //TODO
     [self.operationQueue scheduleOperation:^{
         BOOL containsObject = [self containsObjectForKey:key];
         block(containsObject);
@@ -112,6 +121,7 @@ static NSString * const PINCacheSharedName = @"PINCacheShared";
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wshadow"
 
+//Step-Get-Async 1
 - (void)objectForKeyAsync:(NSString *)key completion:(PINCacheObjectBlock)block
 {
     if (!key || !block)
@@ -121,11 +131,15 @@ static NSString * const PINCacheSharedName = @"PINCacheShared";
         [self->_memoryCache objectForKeyAsync:key completion:^(PINMemoryCache *memoryCache, NSString *memoryCacheKey, id memoryCacheObject) {
             if (memoryCacheObject) {
                 // Update file modification date. TODO: make this a separate method?
+                
+                //Step-Get-Async 3
                 [self->_diskCache fileURLForKeyAsync:memoryCacheKey completion:^(NSString * _Nonnull key, NSURL * _Nullable fileURL) {}];
                 [self->_operationQueue scheduleOperation:^{
                     block(self, memoryCacheKey, memoryCacheObject);
                 }];
             } else {
+                
+                //Step-Get-Async 4
                 [self->_diskCache objectForKeyAsync:memoryCacheKey completion:^(PINDiskCache *diskCache, NSString *diskCacheKey, id <NSCoding> diskCacheObject) {
                     
                     [self->_memoryCache setObjectAsync:diskCacheObject forKey:diskCacheKey completion:nil];
@@ -156,21 +170,24 @@ static NSString * const PINCacheSharedName = @"PINCacheShared";
     [self setObjectAsync:object forKey:key withCost:cost ageLimit:0.0 completion:block];
 }
 
+//Step-Save 1
 - (void)setObjectAsync:(nonnull id)object forKey:(nonnull NSString *)key withCost:(NSUInteger)cost ageLimit:(NSTimeInterval)ageLimit completion:(nullable PINCacheObjectBlock)block
-{
+{ //异步 Save
     if (!key || !object)
         return;
   
     PINOperationGroup *group = [PINOperationGroup asyncOperationGroupWithQueue:_operationQueue];
     
     [group addOperation:^{
+        //Step-Save 4.1
         [self->_memoryCache setObject:object forKey:key withCost:cost ageLimit:ageLimit];
     }];
     [group addOperation:^{
+        //Step-Save 5.1
         [self->_diskCache setObject:object forKey:key withAgeLimit:ageLimit];
     }];
   
-    if (block) {
+    if (block) {//把回调的 block 设置给 operation group
         [group setCompletion:^{
             block(self, key, object);
         }];
@@ -278,6 +295,7 @@ static NSString * const PINCacheSharedName = @"PINCacheShared";
     return byteCount;
 }
 
+//在当前 memory 和 disk 查找当前缓存的内容
 - (BOOL)containsObjectForKey:(NSString *)key
 {
     if (!key)
@@ -286,6 +304,7 @@ static NSString * const PINCacheSharedName = @"PINCacheShared";
     return [_memoryCache containsObjectForKey:key] || [_diskCache containsObjectForKey:key];
 }
 
+//Step-Get-Sync 1
 - (nullable id)objectForKey:(NSString *)key
 {
     if (!key)
@@ -293,12 +312,15 @@ static NSString * const PINCacheSharedName = @"PINCacheShared";
     
     __block id object = nil;
 
+    //Step-Get-Sync 2
     object = [_memoryCache objectForKey:key];
     
-    if (object) {
+    //Step-Get-Sync 3
+    if (object) {//跟新 File 对应 access 周期
         // Update file modification date. TODO: make this a separate method?
         [_diskCache fileURLForKeyAsync:key completion:^(NSString * _Nonnull key, NSURL * _Nullable fileURL) {}];
     } else {
+        //Step-Get-Sync 4
         object = [_diskCache objectForKey:key];
         [_memoryCache setObject:object forKey:key];
     }
@@ -321,12 +343,15 @@ static NSString * const PINCacheSharedName = @"PINCacheShared";
     [self setObject:object forKey:key withCost:cost ageLimit:0.0];
 }
 
+//Step-Save-Sync 1
 - (void)setObject:(nullable id)object forKey:(nonnull NSString *)key withCost:(NSUInteger)cost ageLimit:(NSTimeInterval)ageLimit
 {
     if (!key || !object)
         return;
     
+    //Step-Save-Sync 2
     [_memoryCache setObject:object forKey:key withCost:cost ageLimit:ageLimit];
+    //Step-Save-Sync 3
     [_diskCache setObject:object forKey:key withAgeLimit:ageLimit];
 }
 

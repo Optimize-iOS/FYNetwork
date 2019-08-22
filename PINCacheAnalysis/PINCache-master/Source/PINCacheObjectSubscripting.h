@@ -10,6 +10,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+//
+// pinCache 的 subscript 描述 
 @protocol PINCacheObjectSubscripting <NSObject>
 
 @required

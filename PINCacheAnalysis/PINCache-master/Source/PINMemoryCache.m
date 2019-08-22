@@ -1,6 +1,11 @@
 //  PINCache is a modified version of TMCache
 //  Modifications by Garrett Moon
 //  Copyright (c) 2015 Pinterest. All rights reserved.
+//
+//  PINMemoryCache 对缓存数据采用 Dictionary 来实现
+//  于此同时也缓存当前基本参数：创建时间、修改时间、花费空间和生命周期
+//
+//
 
 #import "PINMemoryCache.h"
 
@@ -18,7 +23,9 @@ static NSString * const PINMemoryCacheSharedName = @"PINMemoryCacheSharedName";
 @property (copy, nonatomic) NSString *name;
 @property (strong, nonatomic) PINOperationQueue *operationQueue;
 @property (assign, nonatomic) pthread_mutex_t mutex;
+//当前缓存内容字典
 @property (strong, nonatomic) NSMutableDictionary *dictionary;
+//保存对应内存缓存参数：创建时间、缓存容量、缓存周期显示
 @property (strong, nonatomic) NSMutableDictionary *createdDates;
 @property (strong, nonatomic) NSMutableDictionary *accessDates;
 @property (strong, nonatomic) NSMutableDictionary *costs;
@@ -28,9 +35,11 @@ static NSString * const PINMemoryCacheSharedName = @"PINMemoryCacheSharedName";
 @implementation PINMemoryCache
 
 @synthesize name = _name;
+
 @synthesize ageLimit = _ageLimit;
 @synthesize costLimit = _costLimit;
 @synthesize totalCost = _totalCost;
+
 @synthesize ttlCache = _ttlCache;
 @synthesize willAddObjectBlock = _willAddObjectBlock;
 @synthesize willRemoveObjectBlock = _willRemoveObjectBlock;
@@ -256,6 +265,7 @@ static NSString * const PINMemoryCacheSharedName = @"PINMemoryCacheSharedName";
     }
 }
 
+//Step-Save 4.4
 - (void)trimToCostLimitByDate:(NSUInteger)limit
 {
     if (self.isTTLCache) {
@@ -269,9 +279,11 @@ static NSString * const PINMemoryCacheSharedName = @"PINMemoryCacheSharedName";
         NSArray *keysSortedByAccessDate = [_accessDates keysSortedByValueUsingSelector:@selector(compare:)];
     [self unlock];
     
-    if (totalCost <= limit)
+    if (totalCost <= limit) //总花费和当前限制
         return;
 
+    //内存缓存超出当前限制 ---> 根据修改日期删除对应缓存
+    // total < limit 中断此循环
     for (NSString *key in keysSortedByAccessDate) { // oldest objects first
         [self removeObjectAndExecuteBlocksForKey:key];
 
@@ -329,6 +341,7 @@ static NSString * const PINMemoryCacheSharedName = @"PINMemoryCacheSharedName";
     } withPriority:PINOperationQueuePriorityHigh];
 }
 
+//Step-Get-Async 2
 - (void)objectForKeyAsync:(NSString *)key completion:(PINCacheObjectBlock)block
 {
     if (block == nil) {
@@ -450,6 +463,7 @@ static NSString * const PINMemoryCacheSharedName = @"PINMemoryCacheSharedName";
     return containsObject;
 }
 
+//从内存中获取
 - (nullable id)objectForKey:(NSString *)key
 {
     if (!key)
@@ -503,6 +517,7 @@ static NSString * const PINMemoryCacheSharedName = @"PINMemoryCacheSharedName";
     [self setObject:object forKey:key withCost:cost ageLimit:0.0];
 }
 
+//Step-Save 4.2
 - (void)setObject:(id)object forKey:(NSString *)key withCost:(NSUInteger)cost ageLimit:(NSTimeInterval)ageLimit
 {
     NSAssert(ageLimit <= 0.0 || (ageLimit > 0.0 && _ttlCache), @"ttlCache must be set to YES if setting an object-level age limit.");
@@ -522,7 +537,7 @@ static NSString * const PINMemoryCacheSharedName = @"PINMemoryCacheSharedName";
     [self lock];
         NSNumber* oldCost = _costs[key];
         if (oldCost)
-            _totalCost -= [oldCost unsignedIntegerValue];
+            _totalCost -= [oldCost unsignedIntegerValue]; //目前总缓存花费
 
         NSDate *now = [NSDate date];
         _dictionary[key] = object;
@@ -572,6 +587,7 @@ static NSString * const PINMemoryCacheSharedName = @"PINMemoryCacheSharedName";
     [self trimToCostLimit:cost];
 }
 
+//Step-Save 4.3
 - (void)trimToCostByDate:(NSUInteger)cost
 {
     [self trimToCostLimitByDate:cost];

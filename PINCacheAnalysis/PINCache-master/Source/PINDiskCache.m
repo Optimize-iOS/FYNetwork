@@ -23,7 +23,9 @@ const char * PINDiskCacheAgeLimitAttributeName = "com.pinterest.PINDiskCache.age
 NSString * const PINDiskCacheErrorDomain = @"com.pinterest.PINDiskCache";
 NSErrorUserInfoKey const PINDiskCacheErrorReadFailureCodeKey = @"PINDiskCacheErrorReadFailureCodeKey";
 NSErrorUserInfoKey const PINDiskCacheErrorWriteFailureCodeKey = @"PINDiskCacheErrorWriteFailureCodeKey";
+
 NSString * const PINDiskCachePrefix = @"com.pinterest.PINDiskCache";
+
 static NSString * const PINDiskCacheSharedName = @"PINDiskCacheShared";
 
 static NSString * const PINDiskCacheOperationIdentifierTrimToDate = @"PINDiskCacheOperationIdentifierTrimToDate";
@@ -122,6 +124,7 @@ static NSURL *_sharedTrashURL;
     return [self initWithName:@""];
 }
 
+//默认是 Cache
 - (instancetype)initWithName:(NSString *)name
 {
     return [self initWithName:name rootPath:[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0]];
@@ -212,6 +215,7 @@ static NSURL *_sharedTrashURL;
         
         _byteCount = 0;
         
+        //默认大小 | 默认保存时间是 1 Month
         // 50 MB by default
         _byteLimit = 50 * 1024 * 1024;
         // 30 days by default
@@ -260,7 +264,7 @@ static NSURL *_sharedTrashURL;
         //we don't want to do anything without setting up the disk cache, but we also don't want to block init, it can take a while to initialize. This must *not* be done on _operationQueue because other operations added may hold the lock and fill up the queue.
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             [self lock];
-                [self _locked_createCacheDirectory];
+                [self _locked_createCacheDirectory]; //
             [self unlock];
             [self initializeDiskProperties];
         });
@@ -395,7 +399,7 @@ static NSURL *_sharedTrashURL;
 #pragma mark - Private Trash Methods -
 
 + (dispatch_queue_t)sharedTrashQueue
-{
+{ //在后台线程中清除
     static dispatch_queue_t trashQueue;
     static dispatch_once_t predicate;
     
@@ -440,6 +444,7 @@ static NSURL *_sharedTrashURL;
     return trashURL;
 }
 
+//Move disk data to trash data at temporary
 + (BOOL)moveItemAtURLToTrash:(NSURL *)itemURL
 {
     if (![[NSFileManager defaultManager] fileExistsAtPath:[itemURL path]])
@@ -620,6 +625,7 @@ static NSURL *_sharedTrashURL;
     return success;
 }
 
+//Step-Save 5.3.1.1
 - (void)asynchronouslySetAgeLimit:(NSTimeInterval)ageLimit forURL:(NSURL *)fileURL
 {
     [self.operationQueue scheduleOperation:^{
@@ -629,6 +635,7 @@ static NSURL *_sharedTrashURL;
     } withPriority:PINOperationQueuePriorityLow];
 }
 
+//Step-Save 5.3.1.2
 - (BOOL)_locked_setAgeLimit:(NSTimeInterval)ageLimit forURL:(NSURL *)fileURL
 {
     if (!fileURL) {
@@ -637,7 +644,7 @@ static NSURL *_sharedTrashURL;
 
     NSError *error = nil;
     if (ageLimit <= 0.0) {
-        if (removexattr(PINDiskCacheFileSystemRepresentation(fileURL), PINDiskCacheAgeLimitAttributeName, 0) != 0) {
+        if (removexattr(PINDiskCacheFileSystemRepresentation(fileURL), PINDiskCacheAgeLimitAttributeName, 0) != 0) {//delete 当前时间标示
           // Ignore if the extended attribute was never recorded for this file.
           if (errno != ENOATTR) {
             NSDictionary<NSErrorUserInfoKey, id> *userInfo = @{ PINDiskCacheErrorWriteFailureCodeKey : @(errno)};
@@ -646,7 +653,7 @@ static NSURL *_sharedTrashURL;
           }
         }
     } else {
-        if (setxattr(PINDiskCacheFileSystemRepresentation(fileURL), PINDiskCacheAgeLimitAttributeName, &ageLimit, sizeof(NSTimeInterval), 0, 0) != 0) {
+        if (setxattr(PINDiskCacheFileSystemRepresentation(fileURL), PINDiskCacheAgeLimitAttributeName, &ageLimit, sizeof(NSTimeInterval), 0, 0) != 0) {//update file access date
             NSDictionary<NSErrorUserInfoKey, id> *userInfo = @{ PINDiskCacheErrorWriteFailureCodeKey : @(errno)};
             error = [NSError errorWithDomain:PINDiskCacheErrorDomain code:PINDiskCacheErrorWriteFailure userInfo:userInfo];
             PINDiskCacheError(error);
@@ -663,6 +670,7 @@ static NSURL *_sharedTrashURL;
     return !error;
 }
 
+//删除过期数据
 - (BOOL)removeFileAndExecuteBlocksForKey:(NSString *)key
 {
     NSURL *fileURL = [self encodedFileURLForKey:key];
@@ -739,6 +747,7 @@ static NSURL *_sharedTrashURL;
 }
 
 // This is the default trimming method which happens automatically
+//Step-Save 5.3.2.3.3
 - (void)trimDiskToSizeByDate:(NSUInteger)trimByteCount
 {
     if (self.isTTLCache) {
@@ -758,6 +767,7 @@ static NSURL *_sharedTrashURL;
             
             NSUInteger bytesSaved = 0;
             // objects accessed last first.
+            //根据时间排序来计算清除缓存 key
             for (NSString *key in keysSortedByLastModifiedDate) {
                 [keysToRemove addObject:key];
                 NSNumber *byteSize = _metadata[key].size;
@@ -858,6 +868,7 @@ static NSURL *_sharedTrashURL;
     } withPriority:PINOperationQueuePriorityLow];
 }
 
+//Step-Get-Async 4.1
 - (void)objectForKeyAsync:(NSString *)key completion:(PINDiskCacheObjectBlock)block
 {
     [self.operationQueue scheduleOperation:^{
@@ -966,6 +977,7 @@ static NSURL *_sharedTrashURL;
 
 - (void)trimToSizeByDateAsync:(NSUInteger)trimByteCount completion:(PINCacheBlock)block
 {
+    //Step-Save 5.3.2.2
     PINOperationBlock operation = ^(id data){
         [self trimToSizeByDate:((NSNumber *)data).unsignedIntegerValue];
     };
@@ -977,6 +989,7 @@ static NSURL *_sharedTrashURL;
         };
     }
     
+    //Step-Save 5.3.2.1
     [self.operationQueue scheduleOperation:operation
                               withPriority:PINOperationQueuePriorityLow
                                 identifier:PINDiskCacheOperationIdentifierTrimToSizeByDate
@@ -1055,6 +1068,8 @@ static NSURL *_sharedTrashURL;
     return [self objectForKey:key];
 }
 
+//
+///
 - (nullable id <NSCoding>)objectForKey:(NSString *)key fileURL:(NSURL **)outFileURL
 {
     [self lock];
@@ -1082,6 +1097,7 @@ static NSURL *_sharedTrashURL;
         if (!self->_ttlCache || ageLimit <= 0 || fabs([_metadata[key].createdDate timeIntervalSinceDate:now]) < ageLimit) {
             // If the cache should behave like a TTL cache, then only fetch the object if there's a valid ageLimit and  the object is still alive
             
+            //从 file 获取初始化 data 数据
             NSData *objectData = [[NSData alloc] initWithContentsOfFile:[fileURL path]];
           
             if (objectData) {
@@ -1100,7 +1116,7 @@ static NSURL *_sharedTrashURL;
               }
               [self lock];
             }
-            if (object) {
+            if (object) {//更新缓存最后更新时间 && 设置 file 文件更新时间 
                 _metadata[key].lastModifiedDate = now;
                 [self asynchronouslySetFileModificationDate:now forURL:fileURL];
             }
@@ -1148,6 +1164,7 @@ static NSURL *_sharedTrashURL;
     [self setObject:object forKey:key withAgeLimit:0.0];
 }
 
+//Step-Save 5.2
 - (void)setObject:(id <NSCoding>)object forKey:(NSString *)key withAgeLimit:(NSTimeInterval)ageLimit
 {
     [self setObject:object forKey:key withAgeLimit:ageLimit fileURL:nil];
@@ -1172,6 +1189,7 @@ static NSURL *_sharedTrashURL;
     }
 }
 
+//Step-Save 5.3
 - (void)setObject:(id <NSCoding>)object forKey:(NSString *)key withAgeLimit:(NSTimeInterval)ageLimit fileURL:(NSURL **)outFileURL
 {
     NSAssert(ageLimit <= 0.0 || (ageLimit > 0.0 && _ttlCache), @"ttlCache must be set to YES if setting an object-level age limit.");
@@ -1191,7 +1209,7 @@ static NSURL *_sharedTrashURL;
     NSURL *fileURL = nil;
 
     NSUInteger byteLimit = self.byteLimit;
-    if (data.length <= byteLimit || byteLimit == 0) {
+    if (data.length <= byteLimit || byteLimit == 0) { //写入磁盘的文件路径
         // The cache is large enough to fit this object (although we may need to evict others).
         fileURL = [self encodedFileURLForKey:key];
     } else {
@@ -1212,15 +1230,17 @@ static NSURL *_sharedTrashURL;
         }
     
         NSError *writeError = nil;
+        //采用 Data 接口把数据写入到本地磁盘
         BOOL written = [data writeToURL:fileURL options:writeOptions error:&writeError];
         PINDiskCacheError(writeError);
         
-        if (written) {
+        if (written) {//Save 成功
             if (_metadata[key] == nil) {
                 _metadata[key] = [[PINDiskCacheMetadata alloc] init];
             }
             
             NSError *error = nil;
+            //获取当前 file 基本信息：创建日期、修改日期和允许保存文件大小
             NSDictionary *values = [fileURL resourceValuesForKeys:@[ NSURLCreationDateKey, NSURLContentModificationDateKey, NSURLTotalFileAllocatedSizeKey ] error:&error];
             PINDiskCacheError(error);
             
@@ -1241,8 +1261,12 @@ static NSURL *_sharedTrashURL;
             if (lastModifiedDate) {
                 self->_metadata[key].lastModifiedDate = lastModifiedDate;
             }
+            //根据设置的过期时间
+            //Step-Save 5.3.1
             [self asynchronouslySetAgeLimit:ageLimit forURL:fileURL];
             if (self->_byteLimit > 0 && self->_byteCount > self->_byteLimit)
+                //根据过期时间设置来管理对应缓存内容
+                //Step-Save 5.3.2
                 [self trimToSizeByDateAsync:self->_byteLimit completion:nil];
         } else {
             fileURL = nil;
@@ -1305,16 +1329,21 @@ static NSURL *_sharedTrashURL;
     [self trimDiskToDate:trimDate];
 }
 
+//删除多余缓存数据
+//Step-Save 5.3.2.3
 - (void)trimToSizeByDate:(NSUInteger)trimByteCount
 {
+    //Step-Save 5.3.2.3.1
     if (trimByteCount == 0) {
         [self removeAllObjects];
         return;
     }
     
+    //Step-Save 5.3.2.3.2
     [self trimDiskToSizeByDate:trimByteCount];
 }
 
+//根据日期来处理对应数据
 - (void)removeExpiredObjects
 {
     [self lockForWriting];
@@ -1335,6 +1364,7 @@ static NSURL *_sharedTrashURL;
     }
 }
 
+//删除当前缓存所有数据
 - (void)removeAllObjects
 {
     // We don't need to know the disk state since we're just going to remove everything.
@@ -1346,10 +1376,12 @@ static NSURL *_sharedTrashURL;
             [self lock];
         }
     
+        //
         [PINDiskCache moveItemAtURLToTrash:self->_cacheURL];
+        //
         [PINDiskCache emptyTrash];
         
-        [self _locked_createCacheDirectory];
+        [self _locked_createCacheDirectory];//Rebuilt cache file
         
         [self->_metadata removeAllObjects];
         self.byteCount = 0; // atomic

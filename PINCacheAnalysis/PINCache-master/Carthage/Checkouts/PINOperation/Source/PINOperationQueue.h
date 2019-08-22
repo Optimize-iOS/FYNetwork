@@ -49,6 +49,7 @@ PINOP_SUBCLASSING_RESTRICTED
  *
  * @param operation The operation object to be added to the queue.
  *
+ * 把当前的任务加载到任务队列 
  */
 - (id <PINOperationReference>)scheduleOperation:(dispatch_block_t)operation;
 

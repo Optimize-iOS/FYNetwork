@@ -21,12 +21,13 @@
   NSMutableArray <dispatch_block_t> *_operations;
   NSMutableArray <NSNumber *> *_operationPriorities;
   NSMutableArray <id <PINGroupOperationReference>> *_operationReferences;
+  ///
   NSMapTable <id <PINGroupOperationReference>, id <PINOperationReference>> *_groupToOperationReferences;
   NSUInteger _operationReferenceCount;
   
   dispatch_group_t _group;
   
-  dispatch_block_t _completion;
+  dispatch_block_t _completion; //
   
   BOOL _started;
   BOOL _canceled;
@@ -76,7 +77,7 @@
   [self lock];
     NSAssert(_canceled == NO, @"Operation group canceled.");
     if (_started == NO && _canceled == NO) {
-      for (NSUInteger idx = 0; idx < _operations.count; idx++) {
+      for (NSUInteger idx = 0; idx < _operations.count; idx++) { //对加入到 group 执行统一执行
         dispatch_group_enter(_group);
         dispatch_block_t originalOperation = _operations[idx];
         dispatch_block_t groupBlock = ^{
@@ -84,12 +85,14 @@
           dispatch_group_leave(_group);
         };
         
+        //Step-Save 2.3 
         id <PINOperationReference> operationReference = [_operationQueue scheduleOperation:groupBlock withPriority:[_operationPriorities[idx] unsignedIntegerValue]];
         [_groupToOperationReferences setObject:operationReference forKey:_operationReferences[idx]];
       }
       
       if (_completion) {
         dispatch_queue_t completionQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+        //执行完毕获取通知
         dispatch_group_notify(_group, completionQueue, ^{
           [self runCompletionIfNeeded];
         });
@@ -123,11 +126,14 @@
   [self unlock];
 }
 
+//Step-Save 2.1
 - (id <PINGroupOperationReference>)addOperation:(dispatch_block_t)operation
 {
   return [self addOperation:operation withPriority:PINOperationQueuePriorityDefault];
 }
 
+//对当前执行添加到管理 block void | priority | reference
+//Step-Save 2.2
 - (id <PINGroupOperationReference>)addOperation:(dispatch_block_t)operation withPriority:(PINOperationQueuePriority)priority
 {
   [self lock];

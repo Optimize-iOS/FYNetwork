@@ -35,6 +35,8 @@ typedef void (^PINCacheObjectEnumerationBlock)(id<PINCaching> cache, NSString *k
  */
 typedef void (^PINCacheObjectContainmentBlock)(BOOL containsObject);
 
+//
+// pinCaching 协议声明 
 @protocol PINCaching <NSObject>
 
 #pragma mark - Core

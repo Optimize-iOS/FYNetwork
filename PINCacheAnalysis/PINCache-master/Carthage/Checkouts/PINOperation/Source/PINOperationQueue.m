@@ -18,30 +18,35 @@
 @interface PINOperationQueue () {
   pthread_mutex_t _lock;
   //increments with every operation to allow cancelation
-  NSUInteger _operationReferenceCount;
+  NSUInteger _operationReferenceCount; //当前引用计数
   NSUInteger _maxConcurrentOperations;
   
-  dispatch_group_t _group;
+  dispatch_group_t _group; //
   
-  dispatch_queue_t _serialQueue;
+  dispatch_queue_t _serialQueue; //串行任务队列
   BOOL _serialQueueBusy;
   
   dispatch_semaphore_t _concurrentSemaphore;
   dispatch_queue_t _concurrentQueue;
+  //
   dispatch_queue_t _semaphoreQueue;
   
+  //在 Operation Queue 中所有任务的队列
   NSMutableOrderedSet<PINOperation *> *_queuedOperations;
+  //根据当前优先级初始化三个对用的 order 集合
   NSMutableOrderedSet<PINOperation *> *_lowPriorityOperations;
   NSMutableOrderedSet<PINOperation *> *_defaultPriorityOperations;
   NSMutableOrderedSet<PINOperation *> *_highPriorityOperations;
   
+  //请求引用任务的 --> 集合字典
   NSMapTable<id<PINOperationReference>, PINOperation *> *_referenceToOperations;
+  //请求唯一表示任务 --> 集合字典
   NSMapTable<NSString *, PINOperation *> *_identifierToOperations;
 }
 
 @end
 
-@interface PINOperation : NSObject
+@interface PINOperation : NSObject //PIN operation | 下载的操作任务
 
 @property (nonatomic, strong) PINOperationBlock block;
 @property (nonatomic, strong) id <PINOperationReference> reference;
@@ -98,6 +103,7 @@
     _maxConcurrentOperations = maxConcurrentOperations;
     _operationReferenceCount = 0;
     
+    //TODO
     pthread_mutexattr_t attr;
     pthread_mutexattr_init(&attr);
     //mutex must be recursive to allow scheduling of operations from within operations
@@ -165,8 +171,10 @@
   return [self scheduleOperation:block withPriority:priority];
 }
 
+//Step-Save 3.1
 - (id <PINOperationReference>)scheduleOperation:(dispatch_block_t)block withPriority:(PINOperationQueuePriority)priority
 {
+  //把相关操作转为当前 queue 队列中单个任务
   PINOperation *operation = [PINOperation operationWithBlock:^(id data) { block(); }
                                                    reference:[self nextOperationReference]
                                                     priority:priority
@@ -174,7 +182,7 @@
                                                         data:nil
                                                   completion:nil];
   [self lock];
-    [self locked_addOperation:operation];
+    [self locked_addOperation:operation];//在当前 Queue 添加当前任务
   [self unlock];
   
   [self scheduleNextOperations:NO];
@@ -237,11 +245,12 @@
   return reference;
 }
 
+//Step-Save 3.2
 - (void)locked_addOperation:(PINOperation *)operation
 {
   NSMutableOrderedSet *queue = [self operationQueueWithPriority:operation.priority];
   
-  dispatch_group_enter(_group);
+  dispatch_group_enter(_group); //
   [queue addObject:operation];
   [_queuedOperations addObject:operation];
   [_referenceToOperations setObject:operation forKey:operation.reference];
@@ -338,9 +347,13 @@
 /**
  Schedule next operations schedules the next operation by queue order onto the serial queue if
  it's available and one operation by priority order onto the concurrent queue.
+ 
  */
+//Step-Save 3.3
 - (void)scheduleNextOperations:(BOOL)onlyCheckSerial
 {
+  
+  ///串行执行
   [self lock];
   
     //get next available operation in order, ignoring priority and run it on the serial queue
@@ -349,10 +362,14 @@
       if (operation) {
         _serialQueueBusy = YES;
         dispatch_async(_serialQueue, ^{
+          
+          //Step-Save 3.6.1 Done!!!
           operation.block(operation.data);
+          ///
           for (dispatch_block_t completion in operation.completions) {
             completion();
           }
+          //Enter
           dispatch_group_leave(_group);
           
           [self lock];
@@ -369,6 +386,7 @@
   
   [self unlock];
   
+  //从当前执行中返回
   if (onlyCheckSerial) {
     return;
   }
@@ -378,7 +396,9 @@
     return;
   }
   
+  ///并行执行
   dispatch_async(_semaphoreQueue, ^{
+    //根据执行任务数量 加锁🔐
     dispatch_semaphore_wait(_concurrentSemaphore, DISPATCH_TIME_FOREVER);
     [self lock];
       PINOperation *operation = [self locked_nextOperationByPriority];
@@ -386,6 +406,8 @@
   
     if (operation) {
       dispatch_async(_concurrentQueue, ^{
+        
+        //Step-Save 3.6.2 Done!!!
         operation.block(operation.data);
         for (dispatch_block_t completion in operation.completions) {
           completion();
@@ -434,8 +456,10 @@
 }
 
 //Call with lock held
+//Step-Save 3.4
 - (PINOperation *)locked_nextOperationByQueue
 {
+  //获取当前操作 | 把操作从相应的优先级队列以及所有操作队列中 remove
   PINOperation *operation = [_queuedOperations firstObject];
   [self locked_removeOperation:operation];
   return operation;
@@ -448,6 +472,7 @@
 }
 
 //Call with lock held
+//Step-Save 3.5
 - (void)locked_removeOperation:(PINOperation *)operation
 {
   if (operation) {
@@ -457,6 +482,7 @@
   }
 }
 
+//lock 采用 pthread_mutex_lock
 - (void)lock
 {
   pthread_mutex_lock(&_lock);

@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-typedef NS_ENUM(NSUInteger, PINOperationQueuePriority) {
+typedef NS_ENUM(NSUInteger, PINOperationQueuePriority) { //operation queue 优先级
     PINOperationQueuePriorityLow,
     PINOperationQueuePriorityDefault,
     PINOperationQueuePriorityHigh,

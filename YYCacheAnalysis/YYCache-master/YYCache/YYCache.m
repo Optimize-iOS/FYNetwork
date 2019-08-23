@@ -22,6 +22,7 @@
 
 - (instancetype)initWithName:(NSString *)name {
     if (name.length == 0) return nil;
+    //默认
     NSString *cacheFolder = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) firstObject];
     NSString *path = [cacheFolder stringByAppendingPathComponent:name];
     return [self initWithPath:path];
@@ -29,6 +30,7 @@
 
 - (instancetype)initWithPath:(NSString *)path {
     if (path.length == 0) return nil;
+    //磁盘作为基础
     YYDiskCache *diskCache = [[YYDiskCache alloc] initWithPath:path];
     if (!diskCache) return nil;
     NSString *name = [path lastPathComponent];
@@ -50,10 +52,12 @@
     return [[self alloc] initWithPath:path];
 }
 
+//Step-Contaion-NoCallback 1
 - (BOOL)containsObjectForKey:(NSString *)key {
     return [_memoryCache containsObjectForKey:key] || [_diskCache containsObjectForKey:key];
 }
 
+//Step-Contaion-Callback 1
 - (void)containsObjectForKey:(NSString *)key withBlock:(void (^)(NSString *key, BOOL contains))block {
     if (!block) return;
     
@@ -66,17 +70,19 @@
     }
 }
 
+//Step-Get-NoCallBack 1
 - (id<NSCoding>)objectForKey:(NSString *)key {
     id<NSCoding> object = [_memoryCache objectForKey:key];
     if (!object) {
         object = [_diskCache objectForKey:key];
-        if (object) {
+        if (object) { //更新内存缓存
             [_memoryCache setObject:object forKey:key];
         }
     }
     return object;
 }
 
+//Step-Get-CallBack 1
 - (void)objectForKey:(NSString *)key withBlock:(void (^)(NSString *key, id<NSCoding> object))block {
     if (!block) return;
     id<NSCoding> object = [_memoryCache objectForKey:key];
@@ -94,11 +100,13 @@
     }
 }
 
+//Step-Save-NoCallBack 1
 - (void)setObject:(id<NSCoding>)object forKey:(NSString *)key {
     [_memoryCache setObject:object forKey:key];
     [_diskCache setObject:object forKey:key];
 }
 
+//Step-Save-CallBack 1
 - (void)setObject:(id<NSCoding>)object forKey:(NSString *)key withBlock:(void (^)(void))block {
     [_memoryCache setObject:object forKey:key];
     [_diskCache setObject:object forKey:key withBlock:block];

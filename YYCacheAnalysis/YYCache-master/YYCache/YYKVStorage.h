@@ -16,6 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  YYKVStorageItem is used by `YYKVStorage` to store key-value pair and meta data.
  Typically, you should not use this class directly.
+ 保存在 Sqlite 数据库中数据类型 
  */
 @interface YYKVStorageItem : NSObject
 @property (nonatomic, strong) NSString *key;                ///< key

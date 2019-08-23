@@ -60,7 +60,7 @@ static void _YYDiskCacheInitGlobal() {
 
 static YYDiskCache *_YYDiskCacheGetGlobal(NSString *path) {
     if (path.length == 0) return nil;
-    _YYDiskCacheInitGlobal();
+    _YYDiskCacheInitGlobal();//初始化全局 实例对象
     dispatch_semaphore_wait(_globalInstancesLock, DISPATCH_TIME_FOREVER);
     id cache = [_globalInstances objectForKey:path];
     dispatch_semaphore_signal(_globalInstancesLock);
@@ -93,6 +93,7 @@ static void _YYDiskCacheSetGlobal(YYDiskCache *cache) {
     });
 }
 
+//在后台线程根据 Limit 处理当前保存数据
 - (void)_trimInBackground {
     __weak typeof(self) _self = self;
     dispatch_async(_queue, ^{
@@ -132,12 +133,15 @@ static void _YYDiskCacheSetGlobal(YYDiskCache *cache) {
 
 - (void)_trimToFreeDiskSpace:(NSUInteger)targetFreeDiskSpace {
     if (targetFreeDiskSpace == 0) return;
+    
+    //(1)保存数据磁盘容量; (2)磁盘空闲总容量; (3)需要剩余磁盘容量
     int64_t totalBytes = [_kv getItemsSize];
     if (totalBytes <= 0) return;
     int64_t diskFreeBytes = _YYDiskSpaceFree();
     if (diskFreeBytes < 0) return;
     int64_t needTrimBytes = targetFreeDiskSpace - diskFreeBytes;
     if (needTrimBytes <= 0) return;
+    //缓存磁盘可用容量
     int64_t costLimit = totalBytes - needTrimBytes;
     if (costLimit < 0) costLimit = 0;
     [self _trimToCost:(int)costLimit];
@@ -177,7 +181,7 @@ static void _YYDiskCacheSetGlobal(YYDiskCache *cache) {
     if (!self) return nil;
     
     YYDiskCache *globalCache = _YYDiskCacheGetGlobal(path);
-    if (globalCache) return globalCache;
+    if (globalCache) return globalCache;//在实现过直接返回
     
     YYKVStorageType type;
     if (threshold == 0) {
@@ -202,13 +206,16 @@ static void _YYDiskCacheSetGlobal(YYDiskCache *cache) {
     _freeDiskSpaceLimit = 0;
     _autoTrimInterval = 60;
     
+    //再次进入对缓存数据处理
     [self _trimRecursively];
+    //把当前 disk cache 作为全局
     _YYDiskCacheSetGlobal(self);
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_appWillBeTerminated) name:UIApplicationWillTerminateNotification object:nil];
     return self;
 }
 
+//Step-Contaion 3 | 4
 - (BOOL)containsObjectForKey:(NSString *)key {
     if (!key) return NO;
     Lock();
@@ -217,6 +224,7 @@ static void _YYDiskCacheSetGlobal(YYDiskCache *cache) {
     return contains;
 }
 
+//Step-Contaion-Callback 3
 - (void)containsObjectForKey:(NSString *)key withBlock:(void(^)(NSString *key, BOOL contains))block {
     if (!block) return;
     __weak typeof(self) _self = self;
@@ -227,6 +235,7 @@ static void _YYDiskCacheSetGlobal(YYDiskCache *cache) {
     });
 }
 
+//Step-Get 3 | 4
 - (id<NSCoding>)objectForKey:(NSString *)key {
     if (!key) return nil;
     Lock();
@@ -235,6 +244,7 @@ static void _YYDiskCacheSetGlobal(YYDiskCache *cache) {
     if (!item.value) return nil;
     
     id object = nil;
+    //TODO
     if (_customUnarchiveBlock) {
         object = _customUnarchiveBlock(item.value);
     } else {
@@ -251,6 +261,7 @@ static void _YYDiskCacheSetGlobal(YYDiskCache *cache) {
     return object;
 }
 
+//Step-Get-CallBack 3
 - (void)objectForKey:(NSString *)key withBlock:(void(^)(NSString *key, id<NSCoding> object))block {
     if (!block) return;
     __weak typeof(self) _self = self;
@@ -261,9 +272,11 @@ static void _YYDiskCacheSetGlobal(YYDiskCache *cache) {
     });
 }
 
+//Step-Save 3 | 4
 - (void)setObject:(id<NSCoding>)object forKey:(NSString *)key {
     if (!key) return;
     if (!object) {
+        //Step-Save-NoCallBack 3.1
         [self removeObjectForKey:key];
         return;
     }
@@ -274,6 +287,7 @@ static void _YYDiskCacheSetGlobal(YYDiskCache *cache) {
         value = _customArchiveBlock(object);
     } else {
         @try {
+            //TODO
             value = [NSKeyedArchiver archivedDataWithRootObject:object];
         }
         @catch (NSException *exception) {
@@ -282,17 +296,19 @@ static void _YYDiskCacheSetGlobal(YYDiskCache *cache) {
     }
     if (!value) return;
     NSString *filename = nil;
-    if (_kv.type != YYKVStorageTypeSQLite) {
-        if (value.length > _inlineThreshold) {
+    if (_kv.type != YYKVStorageTypeSQLite) {//判断保存方式
+        if (value.length > _inlineThreshold) { //根据设置阈值来设置当前保存方案 
             filename = [self _filenameForKey:key];
         }
     }
     
     Lock();
+    //Step-Save-NoCallBack 3.2
     [_kv saveItemWithKey:key value:value filename:filename extendedData:extendedData];
     Unlock();
 }
 
+//Step-Save-CallBack 3
 - (void)setObject:(id<NSCoding>)object forKey:(NSString *)key withBlock:(void(^)(void))block {
     __weak typeof(self) _self = self;
     dispatch_async(_queue, ^{

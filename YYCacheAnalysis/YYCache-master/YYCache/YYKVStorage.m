@@ -220,6 +220,7 @@ static UIApplication *_YYSharedApplication() {
     }
 }
 
+//数据保存到 Sqlite
 - (BOOL)_dbSaveWithKey:(NSString *)key value:(NSData *)value fileName:(NSString *)fileName extendedData:(NSData *)extendedData {
     NSString *sql = @"insert or replace into manifest (key, filename, size, inline_data, modification_time, last_access_time, extended_data) values (?1, ?2, ?3, ?4, ?5, ?6, ?7);";
     sqlite3_stmt *stmt = [self _dbPrepareStmt:sql];
@@ -613,17 +614,20 @@ static UIApplication *_YYSharedApplication() {
 
 #pragma mark - file
 
+//Data 数据保存
 - (BOOL)_fileWriteWithName:(NSString *)filename data:(NSData *)data {
     NSString *path = [_dataPath stringByAppendingPathComponent:filename];
     return [data writeToFile:path atomically:NO];
 }
 
+//Data 数据获取
 - (NSData *)_fileReadWithName:(NSString *)filename {
     NSString *path = [_dataPath stringByAppendingPathComponent:filename];
     NSData *data = [NSData dataWithContentsOfFile:path];
     return data;
 }
 
+//删除当前 File 对应数据
 - (BOOL)_fileDeleteWithName:(NSString *)filename {
     NSString *path = [_dataPath stringByAppendingPathComponent:filename];
     return [[NSFileManager defaultManager] removeItemAtPath:path error:NULL];
@@ -748,7 +752,7 @@ static UIApplication *_YYSharedApplication() {
         return NO;
     }
     
-    if (filename.length) {
+    if (filename.length) {//保存在 File & Sqlite
         if (![self _fileWriteWithName:filename data:value]) {
             return NO;
         }
@@ -757,8 +761,9 @@ static UIApplication *_YYSharedApplication() {
             return NO;
         }
         return YES;
-    } else {
+    } else {//把资源保存在 Sqlite 中
         if (_type != YYKVStorageTypeSQLite) {
+            //在数据库中查找保存的 file name  --> 有保存删除对应 File
             NSString *filename = [self _dbGetFilenameWithKey:key];
             if (filename) {
                 [self _fileDeleteWithName:filename];
@@ -771,13 +776,14 @@ static UIApplication *_YYSharedApplication() {
 - (BOOL)removeItemForKey:(NSString *)key {
     if (key.length == 0) return NO;
     switch (_type) {
-        case YYKVStorageTypeSQLite: {
+        case YYKVStorageTypeSQLite: {//单独使用 Sqlite 直接删除
             return [self _dbDeleteItemWithKey:key];
         } break;
         case YYKVStorageTypeFile:
         case YYKVStorageTypeMixed: {
             NSString *filename = [self _dbGetFilenameWithKey:key];
             if (filename) {
+                //删除 File
                 [self _fileDeleteWithName:filename];
             }
             return [self _dbDeleteItemWithKey:key];
@@ -830,12 +836,14 @@ static UIApplication *_YYSharedApplication() {
     return NO;
 }
 
+//删除超出时间数据
 - (BOOL)removeItemsEarlierThanTime:(int)time {
     if (time <= 0) return YES;
     if (time == INT_MAX) return [self removeAllItems];
     
     switch (_type) {
         case YYKVStorageTypeSQLite: {
+            //Delete 在 Sqlite 中超出时间线数据
             if ([self _dbDeleteItemsWithTimeEarlierThan:time]) {
                 [self _dbCheckpoint];
                 return YES;
@@ -843,6 +851,7 @@ static UIApplication *_YYSharedApplication() {
         } break;
         case YYKVStorageTypeFile:
         case YYKVStorageTypeMixed: {
+            //删除 超出修改 File 时间数据
             NSArray *filenames = [self _dbGetFilenamesWithTimeEarlierThan:time];
             for (NSString *name in filenames) {
                 [self _fileDeleteWithName:name];
@@ -860,6 +869,7 @@ static UIApplication *_YYSharedApplication() {
     if (maxSize == INT_MAX) return YES;
     if (maxSize <= 0) return [self removeAllItems];
     
+    //Disk 总容量
     int total = [self _dbGetTotalItemSize];
     if (total < 0) return NO;
     if (total <= maxSize) return YES;
@@ -868,9 +878,11 @@ static UIApplication *_YYSharedApplication() {
     BOOL suc = NO;
     do {
         int perCount = 16;
+        //按照页数查询数据
         items = [self _dbGetItemSizeInfoOrderByTimeAscWithLimit:perCount];
         for (YYKVStorageItem *item in items) {
             if (total > maxSize) {
+                //删除 File & Sqlite
                 if (item.filename) {
                     [self _fileDeleteWithName:item.filename];
                 }
@@ -882,6 +894,7 @@ static UIApplication *_YYSharedApplication() {
             if (!suc) break;
         }
     } while (total > maxSize && items.count > 0 && suc);
+    //TODO
     if (suc) [self _dbCheckpoint];
     return suc;
 }
@@ -890,6 +903,7 @@ static UIApplication *_YYSharedApplication() {
     if (maxCount == INT_MAX) return YES;
     if (maxCount <= 0) return [self removeAllItems];
     
+    //总数据
     int total = [self _dbGetTotalItemCount];
     if (total < 0) return NO;
     if (total <= maxCount) return YES;
@@ -898,9 +912,11 @@ static UIApplication *_YYSharedApplication() {
     BOOL suc = NO;
     do {
         int perCount = 16;
+        //页查询
         items = [self _dbGetItemSizeInfoOrderByTimeAscWithLimit:perCount];
         for (YYKVStorageItem *item in items) {
             if (total > maxCount) {
+                //Delete 
                 if (item.filename) {
                     [self _fileDeleteWithName:item.filename];
                 }
@@ -956,14 +972,15 @@ static UIApplication *_YYSharedApplication() {
     }
 }
 
-- (YYKVStorageItem *)getItemForKey:(NSString *)key {
+//Step-Get-NoCallBack 3.1
+- (YYKVStorageItem *)getItemForKey:(NSString *)key { //从 Sqlite 获取值 
     if (key.length == 0) return nil;
     YYKVStorageItem *item = [self _dbGetItemWithKey:key excludeInlineData:NO];
     if (item) {
-        [self _dbUpdateAccessTimeWithKey:key];
-        if (item.filename) {
+        [self _dbUpdateAccessTimeWithKey:key]; //值 Access date 时间
+        if (item.filename) { //是文件单独保存在 Sqlite 和 File 文件中依据
             item.value = [self _fileReadWithName:item.filename];
-            if (!item.value) {
+            if (!item.value) {//保存在 File 文件中 value 数据为空 | 删除在 Sqlite 的映射
                 [self _dbDeleteItemWithKey:key];
                 item = nil;
             }
@@ -1053,8 +1070,10 @@ static UIApplication *_YYSharedApplication() {
     return kv.count ? kv : nil;
 }
 
+//Step-Contaion 3.1 | 4.1
 - (BOOL)itemExistsForKey:(NSString *)key {
     if (key.length == 0) return NO;
+    //查询 Sqlite 数据
     return [self _dbGetItemCountWithKey:key] > 0;
 }
 

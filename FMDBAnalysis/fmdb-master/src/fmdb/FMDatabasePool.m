@@ -136,6 +136,7 @@ typedef NS_ENUM(NSInteger, FMDBTransaction) {
             [[NSException exceptionWithName:@"Database already in pool" reason:@"The FMDatabase being put back into the pool is already present in the pool" userInfo:nil] raise];
         }
         
+        //In & Out pool 队列
         [self->_databaseInPool addObject:db];
         [self->_databaseOutPool removeObject:db];
         
@@ -241,6 +242,7 @@ typedef NS_ENUM(NSInteger, FMDBTransaction) {
     }];
 }
 
+//初始化
 - (void)inDatabase:(__attribute__((noescape)) void (^)(FMDatabase *db))block {
     
     FMDatabase *db = [self db];
@@ -250,6 +252,7 @@ typedef NS_ENUM(NSInteger, FMDBTransaction) {
     [self pushDatabaseBackInPool:db];
 }
 
+//开启事物机制
 - (void)beginTransaction:(FMDBTransaction)transaction withBlock:(void (^)(FMDatabase *db, BOOL *rollback))block {
     
     BOOL shouldRollback = NO;

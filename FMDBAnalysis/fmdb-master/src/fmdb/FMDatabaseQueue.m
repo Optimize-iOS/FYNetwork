@@ -16,9 +16,9 @@
 #endif
 
 typedef NS_ENUM(NSInteger, FMDBTransaction) {
-    FMDBTransactionExclusive,
-    FMDBTransactionDeferred,
-    FMDBTransactionImmediate,
+    FMDBTransactionExclusive,  //独自
+    FMDBTransactionDeferred,   //递归
+    FMDBTransactionImmediate,  //立即
 };
 
 /*
@@ -97,6 +97,7 @@ static const void * const kDispatchQueueSpecificKey = &kDispatchQueueSpecificKey
         
         _path = FMDBReturnRetained(aPath);
         
+        //串行队列
         _queue = dispatch_queue_create([[NSString stringWithFormat:@"fmdb.%@", self] UTF8String], NULL);
         dispatch_queue_set_specific(_queue, kDispatchQueueSpecificKey, (__bridge void *)self, NULL);
         _openFlags = openFlags;
@@ -155,6 +156,7 @@ static const void * const kDispatchQueueSpecificKey = &kDispatchQueueSpecificKey
     [[self database] interrupt];
 }
 
+//Gain database
 - (FMDatabase*)database {
     if (![_db isOpen]) {
         if (!_db) {
@@ -256,6 +258,7 @@ static const void * const kDispatchQueueSpecificKey = &kDispatchQueueSpecificKey
     [self beginTransaction:FMDBTransactionImmediate withBlock:block];
 }
 
+//保存存档
 - (NSError*)inSavePoint:(__attribute__((noescape)) void (^)(FMDatabase *db, BOOL *rollback))block {
 #if SQLITE_VERSION_NUMBER >= 3007000
     static unsigned long savePointIdx = 0;

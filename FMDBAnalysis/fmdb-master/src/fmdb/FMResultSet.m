@@ -137,7 +137,7 @@
         int columnCount = sqlite3_column_count([_statement statement]);
         
         int columnIdx = 0;
-        for (columnIdx = 0; columnIdx < columnCount; columnIdx++) {
+        for (columnIdx = 0; columnIdx < columnCount; columnIdx++) {//
             
             NSString *columnName = [NSString stringWithUTF8String:sqlite3_column_name([_statement statement], columnIdx)];
             id objectValue = [self objectForColumnIndex:columnIdx];
@@ -155,13 +155,14 @@
 
 
 
-
+//遍历获取数据
 - (BOOL)next {
     return [self nextWithError:nil];
 }
 
 - (BOOL)nextWithError:(NSError * _Nullable __autoreleasing *)outErr {
     
+    //在多行的情况来进行遍历 
     int rc = sqlite3_step([_statement statement]);
     
     if (SQLITE_BUSY == rc || SQLITE_LOCKED == rc) {
@@ -382,17 +383,18 @@
         return nil;
     }
     
+    //对应字段的类型
     int columnType = sqlite3_column_type([_statement statement], columnIdx);
     
     id returnValue = nil;
     
-    if (columnType == SQLITE_INTEGER) {
+    if (columnType == SQLITE_INTEGER) {// int
         returnValue = [NSNumber numberWithLongLong:[self longLongIntForColumnIndex:columnIdx]];
     }
-    else if (columnType == SQLITE_FLOAT) {
+    else if (columnType == SQLITE_FLOAT) {// float
         returnValue = [NSNumber numberWithDouble:[self doubleForColumnIndex:columnIdx]];
     }
-    else if (columnType == SQLITE_BLOB) {
+    else if (columnType == SQLITE_BLOB) {// blob
         returnValue = [self dataForColumnIndex:columnIdx];
     }
     else {

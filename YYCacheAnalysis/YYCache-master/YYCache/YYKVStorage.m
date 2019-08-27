@@ -95,6 +95,7 @@ static UIApplication *_YYSharedApplication() {
 - (BOOL)_dbOpen {
     if (_db) return YES;
     
+    //开启 database | 创建 database
     int result = sqlite3_open(_dbPath.UTF8String, &_db);
     if (result == SQLITE_OK) {
         CFDictionaryKeyCallBacks keyCallbacks = kCFCopyStringDictionaryKeyCallBacks;
@@ -161,6 +162,7 @@ static UIApplication *_YYSharedApplication() {
     return YES;
 }
 
+//初始化 Table
 - (BOOL)_dbInitialize {
     NSString *sql = @"pragma journal_mode = wal; pragma synchronous = normal; create table if not exists manifest (key text, filename text, size integer, inline_data blob, modification_time integer, last_access_time integer, extended_data blob, primary key(key)); create index if not exists last_access_time_idx on manifest(last_access_time);";
     return [self _dbExecute:sql];
@@ -172,6 +174,7 @@ static UIApplication *_YYSharedApplication() {
     sqlite3_wal_checkpoint(_db, NULL);
 }
 
+//在开启的 database 创建 Table
 - (BOOL)_dbExecute:(NSString *)sql {
     if (sql.length == 0) return NO;
     if (![self _dbCheck]) return NO;
@@ -187,16 +190,21 @@ static UIApplication *_YYSharedApplication() {
 }
 
 - (sqlite3_stmt *)_dbPrepareStmt:(NSString *)sql {
+    //开启 table
     if (![self _dbCheck] || sql.length == 0 || !_dbStmtCache) return NULL;
+    //获取当前 Stmt 缓存
     sqlite3_stmt *stmt = (sqlite3_stmt *)CFDictionaryGetValue(_dbStmtCache, (__bridge const void *)(sql));
     if (!stmt) {
+        //创建查找
         int result = sqlite3_prepare_v2(_db, sql.UTF8String, -1, &stmt, NULL);
         if (result != SQLITE_OK) {
             if (_errorLogsEnabled) NSLog(@"%s line:%d sqlite stmt prepare error (%d): %s", __FUNCTION__, __LINE__, result, sqlite3_errmsg(_db));
             return NULL;
         }
+        //
         CFDictionarySetValue(_dbStmtCache, (__bridge const void *)(sql), stmt);
     } else {
+        //
         sqlite3_reset(stmt);
     }
     return stmt;
@@ -223,10 +231,12 @@ static UIApplication *_YYSharedApplication() {
 //数据保存到 Sqlite
 - (BOOL)_dbSaveWithKey:(NSString *)key value:(NSData *)value fileName:(NSString *)fileName extendedData:(NSData *)extendedData {
     NSString *sql = @"insert or replace into manifest (key, filename, size, inline_data, modification_time, last_access_time, extended_data) values (?1, ?2, ?3, ?4, ?5, ?6, ?7);";
+    //获取 Add | 替换 缓存区
     sqlite3_stmt *stmt = [self _dbPrepareStmt:sql];
     if (!stmt) return NO;
     
     int timestamp = (int)time(NULL);
+    //绑定数据
     sqlite3_bind_text(stmt, 1, key.UTF8String, -1, NULL);
     sqlite3_bind_text(stmt, 2, fileName.UTF8String, -1, NULL);
     sqlite3_bind_int(stmt, 3, (int)value.length);
@@ -239,8 +249,9 @@ static UIApplication *_YYSharedApplication() {
     sqlite3_bind_int(stmt, 6, timestamp);
     sqlite3_bind_blob(stmt, 7, extendedData.bytes, (int)extendedData.length, 0);
     
+    //执行绑定
     int result = sqlite3_step(stmt);
-    if (result != SQLITE_DONE) {
+    if (result != SQLITE_DONE) {//
         if (_errorLogsEnabled) NSLog(@"%s line:%d sqlite insert error (%d): %s", __FUNCTION__, __LINE__, result, sqlite3_errmsg(_db));
         return NO;
     }
@@ -283,12 +294,16 @@ static UIApplication *_YYSharedApplication() {
     return YES;
 }
 
+//删除在 key 对应数据
 - (BOOL)_dbDeleteItemWithKey:(NSString *)key {
     NSString *sql = @"delete from manifest where key = ?1;";
+    //获取删除句柄
     sqlite3_stmt *stmt = [self _dbPrepareStmt:sql];
     if (!stmt) return NO;
+    //绑定
     sqlite3_bind_text(stmt, 1, key.UTF8String, -1, NULL);
     
+    //执行
     int result = sqlite3_step(stmt);
     if (result != SQLITE_DONE) {
         if (_errorLogsEnabled) NSLog(@"%s line:%d db delete error (%d): %s", __FUNCTION__, __LINE__, result, sqlite3_errmsg(_db));
@@ -297,6 +312,7 @@ static UIApplication *_YYSharedApplication() {
     return YES;
 }
 
+//删除多组数据
 - (BOOL)_dbDeleteItemWithKeys:(NSArray *)keys {
     if (![self _dbCheck]) return NO;
     NSString *sql =  [NSString stringWithFormat:@"delete from manifest where key in (%@);", [self _dbJoinedKeys:keys]];
@@ -343,6 +359,7 @@ static UIApplication *_YYSharedApplication() {
     return YES;
 }
 
+//根据
 - (YYKVStorageItem *)_dbGetItemFromStmt:(sqlite3_stmt *)stmt excludeInlineData:(BOOL)excludeInlineData {
     int i = 0;
     char *key = (char *)sqlite3_column_text(stmt, i++);
@@ -402,7 +419,7 @@ static UIApplication *_YYSharedApplication() {
     
     [self _dbBindJoinedKeys:keys stmt:stmt fromIndex:1];
     NSMutableArray *items = [NSMutableArray new];
-    do {
+    do {//遍历 stmt 缓存区
         result = sqlite3_step(stmt);
         if (result == SQLITE_ROW) {
             YYKVStorageItem *item = [self _dbGetItemFromStmt:stmt excludeInlineData:excludeInlineData];
@@ -415,6 +432,7 @@ static UIApplication *_YYSharedApplication() {
             break;
         }
     } while (1);
+    //释放缓存 
     sqlite3_finalize(stmt);
     return items;
 }
@@ -670,6 +688,7 @@ static UIApplication *_YYSharedApplication() {
     [[NSFileManager defaultManager] removeItemAtPath:[_path stringByAppendingPathComponent:kDBFileName] error:nil];
     [[NSFileManager defaultManager] removeItemAtPath:[_path stringByAppendingPathComponent:kDBShmFileName] error:nil];
     [[NSFileManager defaultManager] removeItemAtPath:[_path stringByAppendingPathComponent:kDBWalFileName] error:nil];
+    //把资源移除
     [self _fileMoveAllToTrash];
     [self _fileEmptyTrashInBackground];
 }
@@ -696,6 +715,7 @@ static UIApplication *_YYSharedApplication() {
     _type = type;
     _dataPath = [path stringByAppendingPathComponent:kDataDirectoryName];
     _trashPath = [path stringByAppendingPathComponent:kTrashDirectoryName];
+    //
     _trashQueue = dispatch_queue_create("com.ibireme.cache.disk.trash", DISPATCH_QUEUE_SERIAL);
     _dbPath = [path stringByAppendingPathComponent:kDBFileName];
     _errorLogsEnabled = YES;
@@ -716,6 +736,8 @@ static UIApplication *_YYSharedApplication() {
         return nil;
     }
     
+    //创建 database --> 建立 table
+    //如果上面失败 Table close --> 重设 --> 创建建立
     if (![self _dbOpen] || ![self _dbInitialize]) {
         // db file may broken...
         [self _dbClose];

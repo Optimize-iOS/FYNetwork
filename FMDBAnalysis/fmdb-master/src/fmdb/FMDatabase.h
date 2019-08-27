@@ -4,6 +4,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+//适配 ARC 和 MRC 
 #if ! __has_feature(objc_arc)
     #define FMDBAutorelease(__v) ([__v autorelease]);
     #define FMDBReturnAutoreleased FMDBAutorelease

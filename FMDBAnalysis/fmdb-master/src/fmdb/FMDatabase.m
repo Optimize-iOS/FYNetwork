@@ -161,18 +161,21 @@ NS_ASSUME_NONNULL_END
 #pragma mark Open and close database
 
 - (BOOL)open {
+    //Step 1
     if (_isOpen) {
         return YES;
     }
     
     // if we previously tried to open and it failed, make sure to close it before we try again
     
+    //Step 2
     if (_db) {
         [self close];
     }
     
     // now open database
 
+    //开启 Table 或者创建当前的 Table
     int err = sqlite3_open([self sqlitePath], (sqlite3**)&_db );
     if(err != SQLITE_OK) {
         NSLog(@"error opening!: %d", err);
@@ -376,7 +379,7 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
     [_cachedStatements removeAllObjects];
 }
 
-- (FMStatement*)cachedStatementForQuery:(NSString*)query {
+- (FMStatement*)cachedStatementForQuery:(NSString*)query { //返回当前未被使用
     
     NSMutableSet* statements = [_cachedStatements objectForKey:query];
     
@@ -396,6 +399,7 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
         return;
     }
     
+    //缓存对应的 statement 
     query = [query copy]; // in case we got handed in a mutable string...
     [statement setQuery:query];
     
@@ -802,11 +806,11 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
 
 - (FMResultSet *)executeQuery:(NSString *)sql withArgumentsInArray:(NSArray*)arrayArgs orDictionary:(NSDictionary *)dictionaryArgs orVAList:(va_list)args {
     
-    if (![self databaseExists]) {
+    if (![self databaseExists]) {//database is not exist
         return 0x00;
     }
     
-    if (_isExecutingStatement) {
+    if (_isExecutingStatement) {//在使用
         [self warnInUse];
         return 0x00;
     }
@@ -822,14 +826,14 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
         NSLog(@"%@ executeQuery: %@", self, sql);
     }
     
-    if (_shouldCacheStatements) {
+    if (_shouldCacheStatements) {//缓存 Sqlite stmt 句柄
         statement = [self cachedStatementForQuery:sql];
         pStmt = statement ? [statement statement] : 0x00;
-        [statement reset];
+        [statement reset];//reset stmt 状态
     }
     
     if (!pStmt) {
-        
+        //执行查找 Sql 
         rc = sqlite3_prepare_v2(_db, [sql UTF8String], -1, &pStmt, 0);
         
         if (SQLITE_OK != rc) {
@@ -852,6 +856,7 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
     
     id obj;
     int idx = 0;
+    //获取在查询中数据参数
     int queryCount = sqlite3_bind_parameter_count(pStmt); // pointed out by Dominic Yu (thanks!)
     
     // If dictionaryArgs is passed in, that means we are using sqlite's named parameter support
@@ -908,6 +913,7 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
             
             idx++;
             
+            //绑定获取对应 paramter 在 stmt 中对应的 index 位置
             [self bindObject:obj toColumn:idx inStatement:pStmt];
         }
     }
@@ -921,7 +927,7 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
     
     FMDBRetain(statement); // to balance the release below
     
-    if (!statement) {
+    if (!statement) {//在 Statement 为空时重新设置当前 stmt 
         statement = [[FMStatement alloc] init];
         [statement setStatement:pStmt];
         
@@ -931,6 +937,7 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
     }
     
     // the statement gets closed in rs's dealloc or [rs close];
+    //
     rs = [FMResultSet resultSetWithStatement:statement usingParentDatabase:self];
     [rs setQuery:sql];
     
@@ -1105,6 +1112,7 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
             
             idx++;
             
+            //对当前 stmt 缓存绑定 idex
             [self bindObject:obj toColumn:idx inStatement:pStmt];
         }
     }
@@ -1128,7 +1136,7 @@ static int FMDBDatabaseBusyHandler(void *f, int count) {
      ** executed is not a SELECT statement, we assume no data will be returned.
      */
     
-    rc      = sqlite3_step(pStmt);
+    rc = sqlite3_step(pStmt);
     
     if (SQLITE_DONE == rc) {
         // all is well, let's return.

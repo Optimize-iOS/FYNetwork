@@ -239,6 +239,7 @@
 
 - (void)locked_addOperation:(PINOperation *)operation
 {
+  //当前优先级请求
   NSMutableOrderedSet *queue = [self operationQueueWithPriority:operation.priority];
   
   dispatch_group_enter(_group);

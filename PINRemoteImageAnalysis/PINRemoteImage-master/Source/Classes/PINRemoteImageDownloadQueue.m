@@ -63,29 +63,39 @@
     [self scheduleDownloadsIfNeeded];
 }
 
+//把当前 Task 添加到对应 queue
+//Step 8.1.5
 - (NSURLSessionDataTask *)addDownloadWithSessionManager:(PINURLSessionManager *)sessionManager
                                                 request:(NSURLRequest *)request
                                                priority:(PINRemoteImageManagerPriority)priority
                                       completionHandler:(PINRemoteImageDownloadCompletion)completionHandler
 {
+    //
     NSURLSessionDataTask *dataTask = [sessionManager dataTaskWithRequest:request
                                                                 priority:priority
                                                        completionHandler:^(NSURLSessionTask *task, NSError *error) {
+                                                           
                                                            completionHandler(task.response, error);
+                                                           
+                                                           //完成后删除对应的 task
                                                            [self lock];
                                                                [self->_runningTasks removeObject:task];
                                                            [self unlock];
 
+                                                           //对当前执行 task 开始遍历
                                                            [self scheduleDownloadsIfNeeded];
                                                        }];
 
+    //把当前任务添加到对应优先级队列中
     [self setQueuePriority:priority forTask:dataTask addIfNecessary:YES];
 
+    //对当前执行 task 开始遍历
     [self scheduleDownloadsIfNeeded];
 
     return dataTask;
 }
 
+//Step 8.1.7
 - (void)scheduleDownloadsIfNeeded
 {
     [self lock];
@@ -135,6 +145,7 @@
     [self setQueuePriority:priority forTask:downloadTask addIfNecessary:NO];
 }
 
+//Step 8.1.6
 - (void)setQueuePriority:(PINRemoteImageManagerPriority)priority forTask:(NSURLSessionDataTask *)downloadTask addIfNecessary:(BOOL)addIfNecessary
 {
     BOOL containsTask = [self removeDownloadTaskFromQueue:downloadTask];

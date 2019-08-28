@@ -13,6 +13,7 @@
 
 @class PINImage;
 
+//图片资源 
 @interface PINRemoteImageMemoryContainer : NSObject
 
 @property (nonatomic, strong) PINImage *image;

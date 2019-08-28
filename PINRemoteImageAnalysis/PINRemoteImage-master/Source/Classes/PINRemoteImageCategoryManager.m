@@ -139,6 +139,7 @@
 + (void)cancelImageDownloadOnView:(id <PINRemoteImageCategory>)view
 {
     if ([self downloadImageOperationUUIDOnView:view]) {
+        //Cancel 在 uuid 对应 task 任务 
         [[PINRemoteImageManager sharedImageManager] cancelTaskWithUUID:[self downloadImageOperationUUIDOnView:view]];
         [self setDownloadImageOperationUUID:nil onView:view];
     }
@@ -163,6 +164,7 @@
         return;
     }
     
+    ///
     [self cancelImageDownloadOnView:view];
   
     if (placeholderImage) {
@@ -187,6 +189,7 @@
         options |= PINRemoteImageManagerDisallowAlternateRepresentations;
     }
     
+    //下载进度
     PINRemoteImageManagerImageCompletion internalProgress = nil;
     if ([self updateWithProgressOnView:view] && processorKey.length <= 0 && processor == nil) {
         internalProgress = ^(PINRemoteImageManagerResult *result)
@@ -212,6 +215,7 @@
         };
     }
     
+    //下载完成
     PINRemoteImageManagerImageCompletion internalCompletion = ^(PINRemoteImageManagerResult *result)
     {
         void (^mainQueue)(void) = ^{
@@ -262,6 +266,7 @@
                                                                                            completion:internalCompletion];
     }
     
+    //
     [self setDownloadImageOperationUUID:downloadImageOperationUUID onView:view];
 }
 

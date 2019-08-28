@@ -17,6 +17,7 @@ NSErrorDomain const PINURLErrorDomain = @"PINURLErrorDomain";
 @property (nonatomic, strong) NSLock *sessionManagerLock;
 @property (nonatomic, strong) NSURLSession *session;
 @property (nonatomic, strong) NSOperationQueue *operationQueue;
+//
 @property (nonatomic, strong) NSMutableDictionary <NSNumber *, dispatch_queue_t> *delegateQueues;
 @property (nonatomic, strong) NSMutableDictionary <NSNumber *, PINURLSessionDataTaskCompletion> *completions;
 
@@ -35,6 +36,7 @@ NSErrorDomain const PINURLErrorDomain = @"PINURLErrorDomain";
         //queue must be serial to ensure proper ordering
         [self.operationQueue setMaxConcurrentOperationCount:1];
         self.session = [NSURLSession sessionWithConfiguration:configuration delegate:self delegateQueue:self.operationQueue];
+        //
         self.completions = [[NSMutableDictionary alloc] init];
         self.delegateQueues = [[NSMutableDictionary alloc] init];
     }
@@ -65,9 +67,11 @@ NSErrorDomain const PINURLErrorDomain = @"PINURLErrorDomain";
         if (@available(iOS 8.0, macOS 10.10, tvOS 9.0, watchOS 2.0, *)) {
             dataTask.priority = dataTaskPriorityWithImageManagerPriority(priority);
         }
+        //在执行回调
         if (completionHandler) {
             [self.completions setObject:completionHandler forKey:@(dataTask.taskIdentifier)];
         }
+        //
         NSString *queueName = [NSString stringWithFormat:@"PINURLSessionManager delegate queue - %ld", (unsigned long)dataTask.taskIdentifier];
         dispatch_queue_t delegateQueue = dispatch_queue_create([queueName UTF8String], DISPATCH_QUEUE_SERIAL);
         [self.delegateQueues setObject:delegateQueue forKey:@(dataTask.taskIdentifier)];

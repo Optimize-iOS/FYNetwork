@@ -51,8 +51,10 @@ typedef NS_OPTIONS(NSUInteger, PINRemoteImageManagerDownloadOptions) {
     /** Download and process with default options (no other options set) */
     PINRemoteImageManagerDownloadOptionsNone = 0,
     /** Set to disallow any alternate representations such as Animated Images */
+    //
     PINRemoteImageManagerDisallowAlternateRepresentations = 1,
     /** Skip decoding the image before returning. This means smaller images returned, but images will be decoded on the main thread when set on an image view */
+    //图片跳过解码操作 
     PINRemoteImageManagerDownloadOptionsSkipDecode = 1 << 1,
     /** Skip the early check of the memory cache */
     PINRemoteImageManagerDownloadOptionsSkipEarlyCheck = 1 << 2,

@@ -49,6 +49,7 @@
     return nil;
 }
 
+//Step 7.4.1
 -(void)objectFromDiskForKey:(NSString *)key completion:(PINRemoteImageCachingObjectBlock)completion
 {
     __weak typeof(self) weakSelf = self;

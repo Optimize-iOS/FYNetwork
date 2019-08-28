@@ -262,6 +262,7 @@
     }
 }
 
+//Step 8.1.2
 - (void)scheduleDownloadWithRequest:(nonnull NSURLRequest *)request
                              resume:(nullable PINResume *)resume
                           skipRetry:(BOOL)skipRetry
@@ -271,6 +272,7 @@
   [self scheduleDownloadWithRequest:request resume:resume skipRetry:skipRetry priority:priority isRetry:NO completionHandler:completionHandler];
 }
 
+//Step 8.1.3
 - (void)scheduleDownloadWithRequest:(NSURLRequest *)request
                              resume:(PINResume *)resume
                           skipRetry:(BOOL)skipRetry
@@ -285,20 +287,24 @@
         self->_resume = resume;
         
         NSURLRequest *adjustedRequest = request;
+        //断点下载
         if (self->_resume) {
             NSMutableURLRequest *mutableRequest = [request mutableCopy];
             NSMutableDictionary *headers = [[mutableRequest allHTTPHeaderFields] mutableCopy];
+            //范围内设置请求
             headers[@"If-Range"] = self->_resume.ifRange;
             headers[@"Range"] = [NSString stringWithFormat:@"bytes=%tu-", self->_resume.resumeData.length];
             mutableRequest.allHTTPHeaderFields = headers;
             adjustedRequest = mutableRequest;
         }
         
+        //Step 8.1.4
         self->_progressImage = [[PINProgressiveImage alloc] initWithDataTask:[self.manager.urlSessionTaskQueue addDownloadWithSessionManager:self.manager.sessionManager
                                                                                                                                      request:adjustedRequest
                                                                                                                                     priority:priority
                                                                                                                            completionHandler:^(NSURLResponse * _Nonnull response, NSError * _Nonnull remoteError)
         {
+            //采用 operationQueue 来来管理任务 
             [self.manager.concurrentOperationQueue scheduleOperation:^{
                 NSError *error = remoteError;
 #if PINRemoteImageLogging
@@ -331,6 +337,7 @@
                             delay = [self->_retryStrategy nextDelay];
                         }
                     }];
+                    
                     if (retry) {
                         PINLog(@"Retrying download of %@ in %lld seconds.", request.URL, delay);
                         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delay * NSEC_PER_SEC)), dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{

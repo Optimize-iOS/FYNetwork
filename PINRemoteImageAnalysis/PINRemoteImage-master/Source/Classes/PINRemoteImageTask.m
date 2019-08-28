@@ -42,6 +42,7 @@
                   progressDownloadBlock:(PINRemoteImageManagerProgressDownload)progressDownloadBlock
                                withUUID:(NSUUID *)UUID
 {
+    //对当前的 task 添加任务执行代码块 
     PINRemoteImageCallbacks *completion = [[PINRemoteImageCallbacks alloc] init];
     completion.completionBlock = completionBlock;
     completion.progressImageBlock = progressImageBlock;
@@ -73,6 +74,8 @@
     return callbackBlocks;
 }
 
+//下载完成实现回调
+//Step 8.1.10.2
 - (void)callCompletionsWithImage:(PINImage *)image
        alternativeRepresentation:(id)alternativeRepresentation
                           cached:(BOOL)cached
@@ -81,6 +84,8 @@
                           remove:(BOOL)remove;
 {
     __weak typeof(self) weakSelf = self;
+    
+    //遍历在下载中回调 --> 找到对应 --> 回调 & 移除当前
     [self.callbackBlocks enumerateKeysAndObjectsUsingBlock:^(NSUUID *UUID, PINRemoteImageCallbacks *callback, BOOL *stop) {
         typeof(self) strongSelf = weakSelf;
       PINRemoteImageManagerImageCompletion completionBlock = callback.completionBlock;
@@ -106,6 +111,7 @@
             });
         }
         if (remove) {
+            //移除 
             [strongSelf removeCallbackWithUUID:UUID];
         }
     }];

@@ -50,6 +50,9 @@
 #define PINRemoteImageManagerCacheKeyMaxLength 200
 
 PINOperationQueuePriority operationPriorityWithImageManagerPriority(PINRemoteImageManagerPriority priority);
+
+///
+//根据 manager 的优先级来设置 Queue 请求 operation 任务优先级
 PINOperationQueuePriority operationPriorityWithImageManagerPriority(PINRemoteImageManagerPriority priority) {
     switch (priority) {
         case PINRemoteImageManagerPriorityLow:
@@ -113,7 +116,7 @@ typedef void (^PINRemoteImageManagerDataCompletion)(NSData *data, NSURLResponse 
 
 @property (nonatomic, strong) id<PINRemoteImageCaching> cache;
 @property (nonatomic, strong) PINURLSessionManager *sessionManager;
-@property (nonatomic, strong) NSMutableDictionary <NSString *, __kindof PINRemoteImageTask *> *tasks;
+@property (nonatomic, strong) NSMutableDictionary <NSString *, __kindof PINRemoteImageTask *> *tasks;//当前下载任务 --> 字典
 @property (nonatomic, strong) NSHashTable <NSUUID *> *canceledTasks;
 @property (nonatomic, strong) NSHashTable <NSUUID *> *UUIDs;
 @property (nonatomic, strong) NSArray <NSNumber *> *progressThresholds;
@@ -217,15 +220,17 @@ static dispatch_once_t sharedDispatchToken;
         _sessionConfiguration = [sessionConfiguration copy];
         if (!_sessionConfiguration) {
             _sessionConfiguration = [NSURLSessionConfiguration ephemeralSessionConfiguration];
-            _sessionConfiguration.timeoutIntervalForRequest = PINRemoteImageManagerDefaultTimeout;
+            _sessionConfiguration.timeoutIntervalForRequest = PINRemoteImageManagerDefaultTimeout;// 30 s
             _sessionConfiguration.requestCachePolicy = NSURLRequestReloadIgnoringLocalCacheData;
             _sessionConfiguration.URLCache = nil;
         }
         _sessionConfiguration.HTTPMaximumConnectionsPerHost = PINRemoteImageHTTPMaximumConnectionsPerHost;
         
+        //
         _callbackQueue = dispatch_queue_create("PINRemoteImageManagerCallbackQueue", DISPATCH_QUEUE_CONCURRENT);
         _lock = [[PINRemoteLock alloc] initWithName:@"PINRemoteImageManager"];
         
+        //
         _concurrentOperationQueue = [[PINOperationQueue alloc] initWithMaxConcurrentOperations: configuration.maxConcurrentOperations];
         _urlSessionTaskQueue = [PINRemoteImageDownloadQueue queueWithMaxConcurrentDownloads:configuration.maxConcurrentDownloads];
         
@@ -618,6 +623,7 @@ static dispatch_once_t sharedDispatchToken;
                             inputUUID:nil];
 }
 
+//Step 1 下载
 - (NSUUID *)downloadImageWithURL:(NSURL *)url
                          options:(PINRemoteImageManagerDownloadOptions)options
                         priority:(PINRemoteImageManagerPriority)priority
@@ -637,15 +643,17 @@ static dispatch_once_t sharedDispatchToken;
         taskClass = [PINRemoteImageDownloadTask class];
     }
     
+    //url map key
     NSString *key = [self cacheKeyForURL:url processorKey:processorKey];
 
-    if (url == nil) {
+    //Step 2
+    if (url == nil) { //当前在 url 为 nil 时，提前返回且 image 为 nil
         [self earlyReturnWithOptions:options url:nil key:key object:nil completion:completion];
         return nil;
     }
     
     NSAssert([url isKindOfClass:[NSURL class]], @"url must be of type NSURL, if it's an NSString, we'll try to correct");
-    if ([url isKindOfClass:[NSString class]]) {
+    if ([url isKindOfClass:[NSString class]]) {//String translate into url
         url = [NSURL URLWithString:(NSString *)url];
     }
 
@@ -653,31 +661,34 @@ static dispatch_once_t sharedDispatchToken;
         UUID = [NSUUID UUID];
     }
 
+    //Step 3
     if ((options & PINRemoteImageManagerDownloadOptionsIgnoreCache) == 0) {
         //Check to see if the image is in memory cache and we're on the main thread.
         //If so, special case this to avoid flashing the UI
         id object = [self.cache objectFromMemoryForKey:key];
-        if (object) {
+        if (object) {//缓存中 key 对应的数据 -> 更新返回
             if ([self earlyReturnWithOptions:options url:url key:key object:object completion:completion]) {
                 return nil;
             }
         }
     }
     
-    if ([url.scheme isEqualToString:@"data"]) {
+    //Step 4
+    if ([url.scheme isEqualToString:@"data"]) {//
         NSData *data = [NSData dataWithContentsOfURL:url];
-        if (data) {
+        if (data) {//如果当前是 data://
             if ([self earlyReturnWithOptions:options url:url key:key object:data completion:completion]) {
                 return nil;
             }
         }
     }
     
+    //Step 5
     [_concurrentOperationQueue scheduleOperation:^
     {
         [self lock];
             //check canceled tasks first
-            if ([self.canceledTasks containsObject:UUID]) {
+            if ([self.canceledTasks containsObject:UUID]) {//取消任务队列中包含 返回
                 PINLog(@"skipping starting %@ because it was canceled.", UUID);
                 [self unlock];
                 return;
@@ -695,7 +706,10 @@ static dispatch_once_t sharedDispatchToken;
                 taskExisted = YES;
                 PINLog(@"Task exists, attaching with key: %@, URL: %@, UUID: %@, task: %@", key, url, UUID, task);
             }
+        
+            //调用 task 调用 block
             [task addCallbacksWithCompletionBlock:completion progressImageBlock:progressImage progressDownloadBlock:progressDownload withUUID:UUID];
+            //
             [self.tasks setObject:task forKey:key];
             // Relax :), task retain the UUID for us, it's ok to have a weak reference to UUID here.
             [self.UUIDs addObject:UUID];
@@ -703,15 +717,21 @@ static dispatch_once_t sharedDispatchToken;
             NSAssert(taskClass == [task class], @"Task class should be the same!");
         [self unlock];
         
+        //Step 6
         if (taskExisted == NO) {
             [self.concurrentOperationQueue scheduleOperation:^
              {
+                 //Step 7
+                 //从缓存中获取对应的图片
                  [self objectForKey:key options:options completion:^(BOOL found, BOOL valid, PINImage *image, id alternativeRepresentation) {
+                     //Step 9
                      if (found) {
                          if (valid) {
+                             //Step 9.1
                              [self callCompletionsWithKey:key image:image alternativeRepresentation:alternativeRepresentation cached:YES response:nil error:nil finalized:YES];
                          } else {
                              //Remove completion and try again
+                             //Step 9.2
                              [self lock];
                                  PINRemoteImageTask *task = [self.tasks objectForKey:key];
                                  [task removeCallbackWithUUID:UUID];
@@ -732,8 +752,10 @@ static dispatch_once_t sharedDispatchToken;
                                               inputUUID:UUID];
                          }
                      } else {
+                         //Step 8
                          if ([taskClass isSubclassOfClass:[PINRemoteImageProcessorTask class]]) {
                              //continue processing
+                             //Step 8.2
                              [self downloadImageWithURL:url
                                                 options:options
                                                priority:priority
@@ -742,6 +764,7 @@ static dispatch_once_t sharedDispatchToken;
                                                    UUID:UUID];
                          } else if ([taskClass isSubclassOfClass:[PINRemoteImageDownloadTask class]]) {
                              //continue downloading
+                             //Step 8.1
                              [self downloadImageWithURL:url
                                                 options:options
                                                priority:priority
@@ -758,6 +781,8 @@ static dispatch_once_t sharedDispatchToken;
     return UUID;
 }
 
+//在下载过程中
+//Step 8.2.1
 - (void)downloadImageWithURL:(NSURL *)url
                      options:(PINRemoteImageManagerDownloadOptions)options
                     priority:(PINRemoteImageManagerPriority)priority
@@ -799,6 +824,7 @@ static dispatch_once_t sharedDispatchToken;
                                                 code:PINRemoteImageManagerErrorFailedToProcessImage
                                             userInfo:nil];
                 }
+                //
                 [strongSelf callCompletionsWithKey:key image:image alternativeRepresentation:nil cached:NO response:result.response error:error finalized:NO];
               
                 if (error == nil && image != nil) {
@@ -810,6 +836,7 @@ static dispatch_once_t sharedDispatchToken;
                         diskData = PINImagePNGRepresentation(image);
                     }
                     
+                    //
                     [strongSelf materializeAndCacheObject:image cacheInDisk:diskData additionalCost:processCost url:url key:key options:options outImage:nil outAltRep:nil];
                 }
                 
@@ -824,10 +851,13 @@ static dispatch_once_t sharedDispatchToken;
                 [strongSelf callCompletionsWithKey:key image:nil alternativeRepresentation:nil cached:NO response:result.response error:error finalized:YES];
             }
         }];
+        //下载过程 UUID
         task.downloadTaskUUID = downloadTaskUUID;
     [self unlock];
 }
 
+//执行下载任务
+//Step 8.1.1
 - (void)downloadImageWithURL:(NSURL *)url
                      options:(PINRemoteImageManagerDownloadOptions)options
                     priority:(PINRemoteImageManagerPriority)priority
@@ -836,6 +866,7 @@ static dispatch_once_t sharedDispatchToken;
                         UUID:(NSUUID *)UUID
 {
     PINResume *resume = nil;
+    //删除 cache
     if ((options & PINRemoteImageManagerDownloadOptionsIgnoreCache) == NO) {
         NSString *resumeKey = [self resumeCacheKeyForURL:url];
         resume = [self.cache objectFromDiskForKey:resumeKey];
@@ -846,12 +877,14 @@ static dispatch_once_t sharedDispatchToken;
         PINRemoteImageDownloadTask *task = [self.tasks objectForKey:key];
     [self unlock];
     
+    //Step 8.1.2
     [task scheduleDownloadWithRequest:[self requestWithURL:url key:key]
                                resume:resume
                             skipRetry:(options & PINRemoteImageManagerDownloadOptionsSkipRetry)
                              priority:priority
                     completionHandler:^(NSData *data, NSURLResponse *response, NSError *error)
     {
+        //Step 8.1.8
         [self->_concurrentOperationQueue scheduleOperation:^
         {
             NSError *remoteImageError = error;
@@ -867,7 +900,8 @@ static dispatch_once_t sharedDispatchToken;
                         maxAge = [httpResponse findMaxAge];
                     }
                 }
-                // Stores the object in the cache.
+                // Stores the object in the cache. 保存获取的 data 资源
+                //Step 8.1.9
                 [self materializeAndCacheObject:data cacheInDisk:data additionalCost:0 maxAge:maxAge url:url key:key options:options outImage:&image outAltRep:&alternativeRepresentation];
              }
 
@@ -877,6 +911,7 @@ static dispatch_once_t sharedDispatchToken;
                                                     userInfo:nil];
              }
 
+            //Step 8.1.10
             [self callCompletionsWithKey:key image:image alternativeRepresentation:alternativeRepresentation cached:NO response:response error:remoteImageError finalized:YES];
          } withPriority:operationPriorityWithImageManagerPriority(priority)];
     }];
@@ -911,9 +946,11 @@ static dispatch_once_t sharedDispatchToken;
 
     if (url != nil && object != nil) {
         resultType = PINRemoteImageResultTypeMemoryCache;
+        ///
         [self materializeAndCacheObject:object url:url key:key options:options outImage:&image outAltRep:&alternativeRepresentation];
     }
     
+    //当在 url 为 nil 时，返回 error
     if (completion && ((image || alternativeRepresentation) || (url == nil))) {
         //If we're on the main thread, special case to call completion immediately
         NSError *error = nil;
@@ -941,6 +978,7 @@ static dispatch_once_t sharedDispatchToken;
     return NO;
 }
 
+//TODO
 - (NSURLRequest *)requestWithURL:(NSURL *)url key:(NSString *)key
 {
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
@@ -960,6 +998,7 @@ static dispatch_once_t sharedDispatchToken;
     return request;
 }
 
+//Step 8.1.10.1
 - (void)callCompletionsWithKey:(NSString *)key
                          image:(PINImage *)image
      alternativeRepresentation:(id)alternativeRepresentation
@@ -1231,6 +1270,7 @@ static dispatch_once_t sharedDispatchToken;
     [self unlock];
 }
 
+//TODO 
 - (void)didReceiveResponse:(nonnull NSURLResponse *)response forTask:(nonnull NSURLSessionTask *)dataTask
 {
     [self lock];
@@ -1364,6 +1404,7 @@ static dispatch_once_t sharedDispatchToken;
 
 #pragma mark - Caching
 
+//Step 7.3.1
 - (BOOL)materializeAndCacheObject:(id)object
                               url:(NSURL *)url
                               key:(NSString *)key
@@ -1374,6 +1415,7 @@ static dispatch_once_t sharedDispatchToken;
     return [self materializeAndCacheObject:object cacheInDisk:nil additionalCost:0 url:url key:key options:options outImage:outImage outAltRep:outAlternateRepresentation];
 }
 
+//Step 7.3.2
 - (BOOL)materializeAndCacheObject:(id)object
                       cacheInDisk:(NSData *)diskData
                    additionalCost:(NSUInteger)additionalCost
@@ -1387,6 +1429,7 @@ static dispatch_once_t sharedDispatchToken;
 
 //takes the object from the cache and returns an image or animated image.
 //if it's a non-alternative representation and skipDecode is not set it also decompresses the image.
+//Step 7.3.3
 - (BOOL)materializeAndCacheObject:(id)object
                       cacheInDisk:(NSData *)diskData
                    additionalCost:(NSUInteger)additionalCost
@@ -1439,6 +1482,7 @@ static dispatch_once_t sharedDispatchToken;
         alternateRepresentation = [_alternateRepProvider alternateRepresentationWithData:data options:options];
     }
     
+    //备选
     if (alternateRepresentation == nil) {
         //we need the image
         [container.lock lockWithBlock:^{
@@ -1478,6 +1522,7 @@ static dispatch_once_t sharedDispatchToken;
                     cacheCost += CGImageGetHeight(imageRef) * CGImageGetBytesPerRow(imageRef);
                 }
                 if (!self.memoryCacheTTLIsEnabled || cacheIndefinitely) {
+                    //采用 NSCache 来实现内存缓存
                     [self.cache setObjectInMemory:container forKey:key withCost:cacheCost];
                 } else {
                     [self.cache setObjectInMemory:container forKey:key withCost:cacheCost withAgeLimit:[maxAge integerValue]];
@@ -1503,6 +1548,7 @@ static dispatch_once_t sharedDispatchToken;
         *outAlternateRepresentation = alternateRepresentation;
     }
     
+    //image 为空时从当前缓存中删除
     if (image == nil && alternateRepresentation == nil) {
         PINLog(@"Invalid item in cache");
         [self.cache removeObjectForKey:key completion:nil];
@@ -1511,6 +1557,7 @@ static dispatch_once_t sharedDispatchToken;
     return YES;
 }
 
+//根据下载 URL 和 进程返回对应的 Key 值
 - (NSString *)cacheKeyForURL:(NSURL *)url processorKey:(NSString *)processorKey
 {
     return [self cacheKeyForURL:url processorKey:processorKey resume:NO];
@@ -1528,6 +1575,7 @@ static dispatch_once_t sharedDispatchToken;
     //Due to the current filesystem used in Darwin, this name must be limited to 255 chars.
     //In case the generated key exceeds PINRemoteImageManagerCacheKeyMaxLength characters,
     //we return the hash of it instead.
+    ///采用文件缓存系统
     if (cacheKey.length > PINRemoteImageManagerCacheKeyMaxLength) {
         __block CC_MD5_CTX ctx;
         CC_MD5_Init(&ctx);
@@ -1546,32 +1594,38 @@ static dispatch_once_t sharedDispatchToken;
         cacheKey = [hexString copy];
     }
     //The resume key must not be hashed, it is used to decide whether or not to decode from the disk cache.
-    if (resume) {
+    if (resume) {//添加 R 前缀
       cacheKey = [PINRemoteImageCacheKeyResumePrefix stringByAppendingString:cacheKey];
     }
 
     return cacheKey;
 }
 
+//Step 7.1
 - (void)objectForKey:(NSString *)key options:(PINRemoteImageManagerDownloadOptions)options completion:(void (^)(BOOL found, BOOL valid, PINImage *image, id alternativeRepresentation))completion
 {
     return [self objectForURL:nil processorKey:nil key:key options:options completion:completion];
 }
 
+//Step 7.2
 - (void)objectForURL:(NSURL *)url processorKey:(NSString *)processorKey key:(NSString *)key options:(PINRemoteImageManagerDownloadOptions)options completion:(void (^)(BOOL found, BOOL valid, PINImage *image, id alternativeRepresentation))completion
 {
+    //
     if ((options & PINRemoteImageManagerDownloadOptionsIgnoreCache) != 0) {
         completion(NO, YES, nil, nil);
         return;
     }
   
+    //
     if (key == nil && url == nil) {
         completion(NO, YES, nil, nil);
         return;
     }
   
+    // url map key
     key = key ?: [self cacheKeyForURL:url processorKey:processorKey];
 
+    //Step 7.3
     void (^materialize)(id object) = ^(id object) {
         PINImage *image = nil;
         id alternativeRepresentation = nil;
@@ -1585,10 +1639,12 @@ static dispatch_once_t sharedDispatchToken;
         completion(YES, valid, image, alternativeRepresentation);
     };
     
+    ///获取缓存中数据
     PINRemoteImageMemoryContainer *container = [self.cache objectFromMemoryForKey:key];
     if (container) {
         materialize(container);
     } else {
+        //Step 7.4
         [self.cache objectFromDiskForKey:key completion:^(id<PINRemoteImageCaching> _Nonnull cache,
                                                          NSString *_Nonnull key,
                                                          id _Nullable object) {

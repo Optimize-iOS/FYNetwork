@@ -25,11 +25,14 @@
     //NSLog(@"WKWebView ContextController Base 64: %@", [QNUrlSafeBase64 encodeString:@"browsingContextController"]);
     //NSLog(@"WKWebView register Protocol Base 64: %@", [QNUrlSafeBase64 encodeString:@"registerSchemeForCustomProtocol:"]);
     //NSLog(@"WKWebView register Protocol Base 64: %@", [QNUrlSafeBase64 encodeString:@"unregisterSchemeForCustomProtocol:"]);
+    //NSLog(@"_remoteAddressAndPort register Protocol Base 64: %@", [QNUrlSafeBase64 encodeString:@"_remoteAddressAndPort"]);
+    //NSLog(@"_requestHeaderBytesSent register Protocol Base 64: %@", [QNUrlSafeBase64 encodeString:@"_requestHeaderBytesSent"]);
+    //NSLog(@"_responseHeaderBytesReceived register Protocol Base 64: %@", [QNUrlSafeBase64 encodeString:@"_responseHeaderBytesReceived"]);
     
     
     [FYURLProtocol start];
     
-    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:@"https://xiaozhuanlan.com/topic/6395124870"]];
+    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:@"https://www.jianshu.com/u/c48ed5ae3925"]];
     //NSURLSession *session = [NSURLSession sharedSession];
     NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
     NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration delegate:self delegateQueue:nil];

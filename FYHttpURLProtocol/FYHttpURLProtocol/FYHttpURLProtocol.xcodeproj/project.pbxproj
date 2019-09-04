@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1630B76D231F9E92001FC914 /* FYNetworkMonitorBaseDataModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 1630B76C231F9E92001FC914 /* FYNetworkMonitorBaseDataModel.m */; };
+		1630B770231FA120001FC914 /* FYNetworkMonitorDataModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 1630B76F231FA120001FC914 /* FYNetworkMonitorDataModel.m */; };
+		1630B773231FA157001FC914 /* FYNetworkMonitorErrorDataModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 1630B772231FA157001FC914 /* FYNetworkMonitorErrorDataModel.m */; };
 		1683F0582318CDD200951F4E /* FYURLProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 1683F0572318CDD200951F4E /* FYURLProtocol.m */; };
 		1683F05B2318FE1C00951F4E /* NSURLSession+FY.m in Sources */ = {isa = PBXBuildFile; fileRef = 1683F05A2318FE1C00951F4E /* NSURLSession+FY.m */; };
 		1683F06223190E0A00951F4E /* QN_GTM_Base64.m in Sources */ = {isa = PBXBuildFile; fileRef = 1683F06123190E0A00951F4E /* QN_GTM_Base64.m */; };
@@ -39,6 +42,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1630B76B231F9E92001FC914 /* FYNetworkMonitorBaseDataModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FYNetworkMonitorBaseDataModel.h; sourceTree = "<group>"; };
+		1630B76C231F9E92001FC914 /* FYNetworkMonitorBaseDataModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FYNetworkMonitorBaseDataModel.m; sourceTree = "<group>"; };
+		1630B76E231FA120001FC914 /* FYNetworkMonitorDataModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FYNetworkMonitorDataModel.h; sourceTree = "<group>"; };
+		1630B76F231FA120001FC914 /* FYNetworkMonitorDataModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FYNetworkMonitorDataModel.m; sourceTree = "<group>"; };
+		1630B771231FA157001FC914 /* FYNetworkMonitorErrorDataModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FYNetworkMonitorErrorDataModel.h; sourceTree = "<group>"; };
+		1630B772231FA157001FC914 /* FYNetworkMonitorErrorDataModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FYNetworkMonitorErrorDataModel.m; sourceTree = "<group>"; };
 		1683F0562318CDD200951F4E /* FYURLProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = FYURLProtocol.h; path = FYHttpURLProtocol/Utils/FYURLProtocol.h; sourceTree = SOURCE_ROOT; };
 		1683F0572318CDD200951F4E /* FYURLProtocol.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = FYURLProtocol.m; path = FYHttpURLProtocol/Utils/FYURLProtocol.m; sourceTree = SOURCE_ROOT; };
 		1683F0592318FE1C00951F4E /* NSURLSession+FY.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "NSURLSession+FY.h"; path = "../NSURLSession+FY.h"; sourceTree = "<group>"; };
@@ -90,6 +99,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1630B76A231F9E3F001FC914 /* MonitorDataModel */ = {
+			isa = PBXGroup;
+			children = (
+				1630B76B231F9E92001FC914 /* FYNetworkMonitorBaseDataModel.h */,
+				1630B76C231F9E92001FC914 /* FYNetworkMonitorBaseDataModel.m */,
+				1630B76E231FA120001FC914 /* FYNetworkMonitorDataModel.h */,
+				1630B76F231FA120001FC914 /* FYNetworkMonitorDataModel.m */,
+				1630B771231FA157001FC914 /* FYNetworkMonitorErrorDataModel.h */,
+				1630B772231FA157001FC914 /* FYNetworkMonitorErrorDataModel.m */,
+			);
+			path = MonitorDataModel;
+			sourceTree = "<group>";
+		};
 		1683F0552318CDB800951F4E /* Utils */ = {
 			isa = PBXGroup;
 			children = (
@@ -102,6 +124,7 @@
 		1683F05E23190D9D00951F4E /* FYURLProtocol */ = {
 			isa = PBXGroup;
 			children = (
+				1630B76A231F9E3F001FC914 /* MonitorDataModel */,
 				1683F0562318CDD200951F4E /* FYURLProtocol.h */,
 				1683F0572318CDD200951F4E /* FYURLProtocol.m */,
 				1683F0592318FE1C00951F4E /* NSURLSession+FY.h */,
@@ -307,6 +330,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				1697795723180C9000208C43 /* ViewController.m in Sources */,
+				1630B770231FA120001FC914 /* FYNetworkMonitorDataModel.m in Sources */,
+				1630B773231FA157001FC914 /* FYNetworkMonitorErrorDataModel.m in Sources */,
+				1630B76D231F9E92001FC914 /* FYNetworkMonitorBaseDataModel.m in Sources */,
 				1683F06523190E1A00951F4E /* QNUrlSafeBase64.m in Sources */,
 				1697796223180C9200208C43 /* main.m in Sources */,
 				1683F06223190E0A00951F4E /* QN_GTM_Base64.m in Sources */,

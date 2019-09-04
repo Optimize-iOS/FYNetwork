@@ -10,6 +10,8 @@
 #import "FYURLProtocol.h"
 #import <WebKit/WKWebView.h>
 #import "QNUrlSafeBase64.h"
+#import "FYNetworkMonitorDataModel.h"
+#import "FYNetworkMonitorErrorDataModel.h"
 
 
 FOUNDATION_STATIC_INLINE Class ContextControllerClass() {
@@ -45,6 +47,9 @@ static NSString *kUrlProtocolKey = @"kUrlProtocolKey";
 @interface FYURLProtocol ()<NSURLSessionDataDelegate>
 
 @property (nonatomic, strong) NSURLSessionDataTask *task;
+@property (nonatomic, strong) NSOperationQueue *sessionDelegateQueue;
+@property (nonatomic, strong) FYNetworkMonitorDataModel *dataModel;
+@property (nonatomic, strong) FYNetworkMonitorErrorDataModel *errorModel;
 
 @end
 
@@ -91,7 +96,15 @@ static NSString *kUrlProtocolKey = @"kUrlProtocolKey";
 }
 
 - (void)startLoading {
-    NSURLSession *session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration] delegate:self delegateQueue:nil];
+    self.dataModel = [[FYNetworkMonitorDataModel alloc] init];
+    self.errorModel = [[FYNetworkMonitorErrorDataModel alloc] init];
+    
+    NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
+    self.sessionDelegateQueue = [[NSOperationQueue alloc] init];
+    self.sessionDelegateQueue.maxConcurrentOperationCount = 1;
+    self.sessionDelegateQueue.name = @"com.fy.httpurl.protocol";
+    
+    NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration delegate:self delegateQueue:self.sessionDelegateQueue];
     
     self.task = [session dataTaskWithRequest:self.request];
     
@@ -145,12 +158,91 @@ static NSString *kUrlProtocolKey = @"kUrlProtocolKey";
     [[self client] URLProtocol:self didLoadData:data];
 }
 
+- (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didFinishCollectingMetrics:(NSURLSessionTaskMetrics *)metrics {
+    if (@available(iOS 10.0, *)) {
+        if ([metrics.transactionMetrics count] <= 0) return;
+        
+        [metrics.transactionMetrics enumerateObjectsUsingBlock:^(NSURLSessionTaskTransactionMetrics * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            if (obj.fetchStartDate) {
+                self.dataModel.requestDate = [obj.fetchStartDate timeIntervalSince1970] * 1000;
+            }
+            
+            if (obj.domainLookupStartDate && obj.domainLookupEndDate) {
+                self.dataModel.waitDNSTime = ceil([obj.domainLookupStartDate timeIntervalSinceDate:obj.fetchStartDate] * 1000);
+                self.dataModel.dnsLookupTime = ceil([obj.domainLookupEndDate timeIntervalSinceDate:obj.domainLookupStartDate] * 1000);
+            }
+            
+            if (obj.connectStartDate && obj.connectEndDate) {
+                self.dataModel.tcpTime = ceil([obj.connectEndDate timeIntervalSinceDate:obj.connectStartDate] * 1000);
+            }
+            
+            if (obj.secureConnectionEndDate && obj.secureConnectionStartDate) {
+                self.dataModel.sslTime = ceil([obj.secureConnectionEndDate timeIntervalSinceDate:obj.secureConnectionStartDate] * 1000);
+            }
+            
+            if (obj.fetchStartDate && obj.responseEndDate) {
+                self.dataModel.requestTime = ceil([obj.responseEndDate timeIntervalSinceDate:obj.fetchStartDate]);
+            }
+            
+            self.dataModel.httpProtocol = obj.networkProtocolName;
+            
+            NSHTTPURLResponse *response = (NSHTTPURLResponse *)obj.response;
+            if ([response isKindOfClass:NSHTTPURLResponse.class]) {
+                self.dataModel.receiveBytes = response.expectedContentLength;
+            }
+            
+            NSString *remoteDecodeString = [[NSString alloc] initWithData:[QNUrlSafeBase64 decodeString:@"X3JlbW90ZUFkZHJlc3NBbmRQb3J0"] encoding:NSUTF8StringEncoding];
+            if ([obj respondsToSelector:NSSelectorFromString(remoteDecodeString)]) {
+                self.dataModel.ip = [obj valueForKey:remoteDecodeString];
+            }
+            
+            NSString *requestDecodeString = [[NSString alloc] initWithData:[QNUrlSafeBase64 decodeString:@"X3JlcXVlc3RIZWFkZXJCeXRlc1NlbnQ="] encoding:NSUTF8StringEncoding];
+            if ([obj respondsToSelector:NSSelectorFromString(requestDecodeString)]) {
+                self.dataModel.sendBytes = [[obj valueForKey:requestDecodeString] unsignedIntegerValue];
+            }
+            
+            NSString *responseDecodeString = [[NSString alloc] initWithData:[QNUrlSafeBase64 decodeString:@"X3Jlc3BvbnNlSGVhZGVyQnl0ZXNSZWNlaXZlZA=="] encoding:NSUTF8StringEncoding];
+            if ([obj respondsToSelector:NSSelectorFromString(responseDecodeString)]) {
+                self.dataModel.receiveBytes = [[obj valueForKey:responseDecodeString] unsignedIntegerValue];
+            }
+            
+            self.dataModel.requestUrl = [obj.request.URL absoluteString];
+            self.dataModel.httpMethod = obj.request.HTTPMethod;
+            self.dataModel.useProxy = obj.isProxyConnection;
+        }];
+        
+        //upload dataModel to apm system
+        
+        NSLog(@"data model: %@ responseData: %llu", self.dataModel, self.dataModel.requestDate);
+    }
+    
+}
+
 - (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error {
     if (error) {
         [self.client URLProtocol:self didFailWithError:error];
     }else {
         [self.client URLProtocolDidFinishLoading:self];
     }
+    
+    if (error) {
+        NSURLRequest *request = task.currentRequest;
+        if (request) {
+            self.errorModel.requestUrl = request.URL.absoluteString;
+            self.errorModel.httpMethod = request.HTTPMethod;
+            self.errorModel.requestParamters = request.URL.query;
+        }
+        
+        self.errorModel.errorCode = error.code;
+        self.errorModel.exceptionName = error.domain;
+        self.errorModel.exceptionDetail = error.description;
+        
+        //upload errorModel to apm system
+        
+        NSLog(@"error model: %@", self.errorModel);
+    }
+    
+    self.task = nil;
 }
 
 @end

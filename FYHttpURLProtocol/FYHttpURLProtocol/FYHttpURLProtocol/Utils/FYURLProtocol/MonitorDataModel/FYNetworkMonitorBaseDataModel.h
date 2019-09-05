@@ -14,8 +14,20 @@
 //url of request
 @property (nonatomic, copy) NSString *requestUrl;
 
+@property (nonatomic, assign) NSUInteger requestLineLength;
+
+@property (nonatomic, assign) UInt64 requestHeadersLength;
+
+@property (nonatomic, assign) UInt64 requestBodyLength;
+
 //header of request
 @property (nonatomic, strong) NSArray *requestHeaders;
+
+@property (nonatomic, assign) NSUInteger responseStatusLineLength;
+
+@property (nonatomic, assign) UInt64 responseHeadersLength;
+
+@property (nonatomic, assign) UInt64 responseBodyLength;
 
 //header of response
 @property (nonatomic, strong) NSArray *responseHeaders;

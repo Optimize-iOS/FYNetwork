@@ -14,6 +14,8 @@
 		1683F05B2318FE1C00951F4E /* NSURLSession+FY.m in Sources */ = {isa = PBXBuildFile; fileRef = 1683F05A2318FE1C00951F4E /* NSURLSession+FY.m */; };
 		1683F06223190E0A00951F4E /* QN_GTM_Base64.m in Sources */ = {isa = PBXBuildFile; fileRef = 1683F06123190E0A00951F4E /* QN_GTM_Base64.m */; };
 		1683F06523190E1A00951F4E /* QNUrlSafeBase64.m in Sources */ = {isa = PBXBuildFile; fileRef = 1683F06323190E1A00951F4E /* QNUrlSafeBase64.m */; };
+		16881F102320ED0F005375DB /* NSURLResponse+FY.m in Sources */ = {isa = PBXBuildFile; fileRef = 16881F0F2320ED0F005375DB /* NSURLResponse+FY.m */; };
+		16881F132320FC68005375DB /* NSURLRequest+FY.m in Sources */ = {isa = PBXBuildFile; fileRef = 16881F122320FC68005375DB /* NSURLRequest+FY.m */; };
 		1697795423180C9000208C43 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1697795323180C9000208C43 /* AppDelegate.m */; };
 		1697795723180C9000208C43 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1697795623180C9000208C43 /* ViewController.m */; };
 		1697795A23180C9000208C43 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1697795823180C9000208C43 /* Main.storyboard */; };
@@ -56,6 +58,10 @@
 		1683F06123190E0A00951F4E /* QN_GTM_Base64.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QN_GTM_Base64.m; sourceTree = "<group>"; };
 		1683F06323190E1A00951F4E /* QNUrlSafeBase64.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QNUrlSafeBase64.m; sourceTree = "<group>"; };
 		1683F06423190E1A00951F4E /* QNUrlSafeBase64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QNUrlSafeBase64.h; sourceTree = "<group>"; };
+		16881F0E2320ED0E005375DB /* NSURLResponse+FY.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSURLResponse+FY.h"; sourceTree = "<group>"; };
+		16881F0F2320ED0F005375DB /* NSURLResponse+FY.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSURLResponse+FY.m"; sourceTree = "<group>"; };
+		16881F112320FC68005375DB /* NSURLRequest+FY.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSURLRequest+FY.h"; sourceTree = "<group>"; };
+		16881F122320FC68005375DB /* NSURLRequest+FY.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSURLRequest+FY.m"; sourceTree = "<group>"; };
 		1697794F23180C9000208C43 /* FYHttpURLProtocol.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FYHttpURLProtocol.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1697795223180C9000208C43 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		1697795323180C9000208C43 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -129,6 +135,10 @@
 				1683F0572318CDD200951F4E /* FYURLProtocol.m */,
 				1683F0592318FE1C00951F4E /* NSURLSession+FY.h */,
 				1683F05A2318FE1C00951F4E /* NSURLSession+FY.m */,
+				16881F0E2320ED0E005375DB /* NSURLResponse+FY.h */,
+				16881F0F2320ED0F005375DB /* NSURLResponse+FY.m */,
+				16881F112320FC68005375DB /* NSURLRequest+FY.h */,
+				16881F122320FC68005375DB /* NSURLRequest+FY.m */,
 			);
 			path = FYURLProtocol;
 			sourceTree = "<group>";
@@ -331,6 +341,7 @@
 			files = (
 				1697795723180C9000208C43 /* ViewController.m in Sources */,
 				1630B770231FA120001FC914 /* FYNetworkMonitorDataModel.m in Sources */,
+				16881F102320ED0F005375DB /* NSURLResponse+FY.m in Sources */,
 				1630B773231FA157001FC914 /* FYNetworkMonitorErrorDataModel.m in Sources */,
 				1630B76D231F9E92001FC914 /* FYNetworkMonitorBaseDataModel.m in Sources */,
 				1683F06523190E1A00951F4E /* QNUrlSafeBase64.m in Sources */,
@@ -339,6 +350,7 @@
 				1683F05B2318FE1C00951F4E /* NSURLSession+FY.m in Sources */,
 				1683F0582318CDD200951F4E /* FYURLProtocol.m in Sources */,
 				1697795423180C9000208C43 /* AppDelegate.m in Sources */,
+				16881F132320FC68005375DB /* NSURLRequest+FY.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

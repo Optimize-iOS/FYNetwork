@@ -12,6 +12,9 @@
 #import "QNUrlSafeBase64.h"
 #import "FYNetworkMonitorDataModel.h"
 #import "FYNetworkMonitorErrorDataModel.h"
+#import "NSURLSession+FY.h"
+#import "NSURLRequest+FY.h"
+#import "NSURLResponse+FY.h"
 
 
 FOUNDATION_STATIC_INLINE Class ContextControllerClass() {
@@ -48,6 +51,8 @@ static NSString *kUrlProtocolKey = @"kUrlProtocolKey";
 
 @property (nonatomic, strong) NSURLSessionDataTask *task;
 @property (nonatomic, strong) NSOperationQueue *sessionDelegateQueue;
+
+@property (nonatomic, strong) NSMutableData *receivedData;
 @property (nonatomic, strong) FYNetworkMonitorDataModel *dataModel;
 @property (nonatomic, strong) FYNetworkMonitorErrorDataModel *errorModel;
 
@@ -96,9 +101,6 @@ static NSString *kUrlProtocolKey = @"kUrlProtocolKey";
 }
 
 - (void)startLoading {
-    self.dataModel = [[FYNetworkMonitorDataModel alloc] init];
-    self.errorModel = [[FYNetworkMonitorErrorDataModel alloc] init];
-    
     NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
     self.sessionDelegateQueue = [[NSOperationQueue alloc] init];
     self.sessionDelegateQueue.maxConcurrentOperationCount = 1;
@@ -112,6 +114,11 @@ static NSString *kUrlProtocolKey = @"kUrlProtocolKey";
 }
 
 - (void)stopLoading {
+    NSURLResponse *response = self.task.response;
+    self.dataModel.responseStatusLineLength = [response statusLineLength];
+    self.dataModel.requestHeadersLength = [response headersLength];
+    self.dataModel.requestBodyLength = [response boyLengthWithReceiveData:self.receivedData.copy];
+    
     [self.task cancel];
     self.task = nil;
 }
@@ -155,6 +162,7 @@ static NSString *kUrlProtocolKey = @"kUrlProtocolKey";
 }
 
 - (void)URLSession:(NSURLSession *)session dataTask:(NSURLSessionDataTask *)dataTask didReceiveData:(NSData *)data {
+    [self.receivedData appendData:data];
     [[self client] URLProtocol:self didLoadData:data];
 }
 
@@ -181,12 +189,13 @@ static NSString *kUrlProtocolKey = @"kUrlProtocolKey";
             }
             
             if (obj.fetchStartDate && obj.responseEndDate) {
-                self.dataModel.requestTime = ceil([obj.responseEndDate timeIntervalSinceDate:obj.fetchStartDate]);
+                self.dataModel.requestTime = ceil([obj.responseEndDate timeIntervalSinceDate:obj.fetchStartDate] * 1000);
             }
             
             self.dataModel.httpProtocol = obj.networkProtocolName;
             
             NSHTTPURLResponse *response = (NSHTTPURLResponse *)obj.response;
+            NSURLRequest *request = obj.request;
             if ([response isKindOfClass:NSHTTPURLResponse.class]) {
                 self.dataModel.receiveBytes = response.expectedContentLength;
             }
@@ -208,7 +217,11 @@ static NSString *kUrlProtocolKey = @"kUrlProtocolKey";
             
             self.dataModel.requestUrl = [obj.request.URL absoluteString];
             self.dataModel.httpMethod = obj.request.HTTPMethod;
+            self.dataModel.httpCode = response.statusCode;
             self.dataModel.useProxy = obj.isProxyConnection;
+            self.dataModel.requestLineLength = [request lineLength];
+            self.dataModel.requestHeadersLength = [request headersLength];
+            self.dataModel.requestBodyLength = [request bodyLenth];
         }];
         
         //upload dataModel to apm system
@@ -227,6 +240,7 @@ static NSString *kUrlProtocolKey = @"kUrlProtocolKey";
     
     if (error) {
         NSURLRequest *request = task.currentRequest;
+        NSURLResponse *response = task.response;
         if (request) {
             self.errorModel.requestUrl = request.URL.absoluteString;
             self.errorModel.httpMethod = request.HTTPMethod;
@@ -236,6 +250,12 @@ static NSString *kUrlProtocolKey = @"kUrlProtocolKey";
         self.errorModel.errorCode = error.code;
         self.errorModel.exceptionName = error.domain;
         self.errorModel.exceptionDetail = error.description;
+        self.errorModel.requestLineLength = [request lineLength];
+        self.errorModel.requestHeadersLength = [request headersLength];
+        self.errorModel.requestBodyLength = [request bodyLenth];
+        self.errorModel.responseStatusLineLength = [response statusLineLength];
+        self.errorModel.requestHeadersLength = [response headersLength];
+        self.errorModel.requestBodyLength = [response boyLengthWithReceiveData:self.receivedData];
         
         //upload errorModel to apm system
         
@@ -243,6 +263,33 @@ static NSString *kUrlProtocolKey = @"kUrlProtocolKey";
     }
     
     self.task = nil;
+}
+
+
+#pragma mark - Lazying
+
+- (NSMutableData *)receivedData {
+    if (_receivedData == nil) {
+        _receivedData = [NSMutableData data];
+    }
+    
+    return _receivedData;
+}
+
+- (FYNetworkMonitorDataModel *)dataModel {
+    if (_dataModel == nil) {
+        _dataModel = [[FYNetworkMonitorDataModel alloc] init];
+    }
+    
+    return _dataModel;
+}
+
+- (FYNetworkMonitorErrorDataModel *)errorModel {
+    if (_errorModel == nil) {
+        _errorModel = [[FYNetworkMonitorErrorDataModel alloc] init];
+    }
+    
+    return _errorModel;
 }
 
 @end

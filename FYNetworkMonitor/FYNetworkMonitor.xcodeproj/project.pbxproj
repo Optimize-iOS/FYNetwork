@@ -1,0 +1,736 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		16666535232264BE00A49AF4 /* FYDelegateProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 16666534232264BE00A49AF4 /* FYDelegateProxy.m */; };
+		166665382322678300A49AF4 /* NSURLConnection+Monitor.m in Sources */ = {isa = PBXBuildFile; fileRef = 166665372322678300A49AF4 /* NSURLConnection+Monitor.m */; };
+		1666653B232270F700A49AF4 /* NSURLSession+Monitor.m in Sources */ = {isa = PBXBuildFile; fileRef = 1666653A232270F700A49AF4 /* NSURLSession+Monitor.m */; };
+		168E6D572323BC4F00BB253E /* UIWebView+Monitor.m in Sources */ = {isa = PBXBuildFile; fileRef = 168E6D562323BC4F00BB253E /* UIWebView+Monitor.m */; };
+		168E6D5B2323C82B00BB253E /* FYBaseMonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = 168E6D5A2323C82B00BB253E /* FYBaseMonitor.m */; };
+		168E6D5E2323C89E00BB253E /* fishhook.c in Sources */ = {isa = PBXBuildFile; fileRef = 168E6D5D2323C89E00BB253E /* fishhook.c */; };
+		168E6D622323C9CE00BB253E /* FYDNSMonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = 168E6D612323C9CE00BB253E /* FYDNSMonitor.m */; };
+		168E6D662323C9F200BB253E /* FYSSLMonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = 168E6D652323C9F200BB253E /* FYSSLMonitor.m */; };
+		168E6D6A2323CA3600BB253E /* FYSocketMonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = 168E6D692323CA3600BB253E /* FYSocketMonitor.m */; };
+		168E6D6E2323CA5F00BB253E /* FYStreamMonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = 168E6D6D2323CA5F00BB253E /* FYStreamMonitor.m */; };
+		16927F542322620C00A1D763 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 16927F532322620C00A1D763 /* AppDelegate.m */; };
+		16927F572322620C00A1D763 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 16927F562322620C00A1D763 /* ViewController.m */; };
+		16927F5A2322620C00A1D763 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 16927F582322620C00A1D763 /* Main.storyboard */; };
+		16927F5C2322620E00A1D763 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 16927F5B2322620E00A1D763 /* Assets.xcassets */; };
+		16927F5F2322620E00A1D763 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 16927F5D2322620E00A1D763 /* LaunchScreen.storyboard */; };
+		16927F622322620E00A1D763 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 16927F612322620E00A1D763 /* main.m */; };
+		16927F6C2322620E00A1D763 /* FYNetworkMonitorTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 16927F6B2322620E00A1D763 /* FYNetworkMonitorTests.m */; };
+		16927F772322620E00A1D763 /* FYNetworkMonitorUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 16927F762322620E00A1D763 /* FYNetworkMonitorUITests.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		16927F682322620E00A1D763 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 16927F472322620C00A1D763 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 16927F4E2322620C00A1D763;
+			remoteInfo = FYNetworkMonitor;
+		};
+		16927F732322620E00A1D763 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 16927F472322620C00A1D763 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 16927F4E2322620C00A1D763;
+			remoteInfo = FYNetworkMonitor;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		16666533232264BE00A49AF4 /* FYDelegateProxy.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FYDelegateProxy.h; sourceTree = "<group>"; };
+		16666534232264BE00A49AF4 /* FYDelegateProxy.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FYDelegateProxy.m; sourceTree = "<group>"; };
+		166665362322678300A49AF4 /* NSURLConnection+Monitor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSURLConnection+Monitor.h"; sourceTree = "<group>"; };
+		166665372322678300A49AF4 /* NSURLConnection+Monitor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSURLConnection+Monitor.m"; sourceTree = "<group>"; };
+		16666539232270F700A49AF4 /* NSURLSession+Monitor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSURLSession+Monitor.h"; sourceTree = "<group>"; };
+		1666653A232270F700A49AF4 /* NSURLSession+Monitor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSURLSession+Monitor.m"; sourceTree = "<group>"; };
+		168E6D552323BC4F00BB253E /* UIWebView+Monitor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIWebView+Monitor.h"; sourceTree = "<group>"; };
+		168E6D562323BC4F00BB253E /* UIWebView+Monitor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UIWebView+Monitor.m"; sourceTree = "<group>"; };
+		168E6D592323C82B00BB253E /* FYBaseMonitor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FYBaseMonitor.h; sourceTree = "<group>"; };
+		168E6D5A2323C82B00BB253E /* FYBaseMonitor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FYBaseMonitor.m; sourceTree = "<group>"; };
+		168E6D5C2323C89E00BB253E /* fishhook.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fishhook.h; sourceTree = "<group>"; };
+		168E6D5D2323C89E00BB253E /* fishhook.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fishhook.c; sourceTree = "<group>"; };
+		168E6D602323C9CE00BB253E /* FYDNSMonitor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FYDNSMonitor.h; sourceTree = "<group>"; };
+		168E6D612323C9CE00BB253E /* FYDNSMonitor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FYDNSMonitor.m; sourceTree = "<group>"; };
+		168E6D642323C9F200BB253E /* FYSSLMonitor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FYSSLMonitor.h; sourceTree = "<group>"; };
+		168E6D652323C9F200BB253E /* FYSSLMonitor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FYSSLMonitor.m; sourceTree = "<group>"; };
+		168E6D682323CA3600BB253E /* FYSocketMonitor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FYSocketMonitor.h; sourceTree = "<group>"; };
+		168E6D692323CA3600BB253E /* FYSocketMonitor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FYSocketMonitor.m; sourceTree = "<group>"; };
+		168E6D6C2323CA5F00BB253E /* FYStreamMonitor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FYStreamMonitor.h; sourceTree = "<group>"; };
+		168E6D6D2323CA5F00BB253E /* FYStreamMonitor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FYStreamMonitor.m; sourceTree = "<group>"; };
+		16927F4F2322620C00A1D763 /* FYNetworkMonitor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FYNetworkMonitor.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		16927F522322620C00A1D763 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		16927F532322620C00A1D763 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		16927F552322620C00A1D763 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
+		16927F562322620C00A1D763 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		16927F592322620C00A1D763 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		16927F5B2322620E00A1D763 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		16927F5E2322620E00A1D763 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		16927F602322620E00A1D763 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		16927F612322620E00A1D763 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		16927F672322620E00A1D763 /* FYNetworkMonitorTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FYNetworkMonitorTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		16927F6B2322620E00A1D763 /* FYNetworkMonitorTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FYNetworkMonitorTests.m; sourceTree = "<group>"; };
+		16927F6D2322620E00A1D763 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		16927F722322620E00A1D763 /* FYNetworkMonitorUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FYNetworkMonitorUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		16927F762322620E00A1D763 /* FYNetworkMonitorUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FYNetworkMonitorUITests.m; sourceTree = "<group>"; };
+		16927F782322620E00A1D763 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		16927F4C2322620C00A1D763 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		16927F642322620E00A1D763 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		16927F6F2322620E00A1D763 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1666652D2322636100A49AF4 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
+		1666652E2322636B00A49AF4 /* ThirdLibs */ = {
+			isa = PBXGroup;
+			children = (
+				168E6D5D2323C89E00BB253E /* fishhook.c */,
+				168E6D5C2323C89E00BB253E /* fishhook.h */,
+			);
+			path = ThirdLibs;
+			sourceTree = "<group>";
+		};
+		1666652F2322637C00A49AF4 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		166665302322644900A49AF4 /* Monitor */ = {
+			isa = PBXGroup;
+			children = (
+				168E6D582323C7B900BB253E /* TCPMonitor */,
+				168E6D542323BBF800BB253E /* WebMonitor */,
+				166665322322646200A49AF4 /* HttpMonitor */,
+				166665312322645800A49AF4 /* Help */,
+			);
+			path = Monitor;
+			sourceTree = "<group>";
+		};
+		166665312322645800A49AF4 /* Help */ = {
+			isa = PBXGroup;
+			children = (
+				16666533232264BE00A49AF4 /* FYDelegateProxy.h */,
+				16666534232264BE00A49AF4 /* FYDelegateProxy.m */,
+			);
+			path = Help;
+			sourceTree = "<group>";
+		};
+		166665322322646200A49AF4 /* HttpMonitor */ = {
+			isa = PBXGroup;
+			children = (
+				166665362322678300A49AF4 /* NSURLConnection+Monitor.h */,
+				166665372322678300A49AF4 /* NSURLConnection+Monitor.m */,
+				16666539232270F700A49AF4 /* NSURLSession+Monitor.h */,
+				1666653A232270F700A49AF4 /* NSURLSession+Monitor.m */,
+			);
+			path = HttpMonitor;
+			sourceTree = "<group>";
+		};
+		168E6D542323BBF800BB253E /* WebMonitor */ = {
+			isa = PBXGroup;
+			children = (
+				168E6D552323BC4F00BB253E /* UIWebView+Monitor.h */,
+				168E6D562323BC4F00BB253E /* UIWebView+Monitor.m */,
+			);
+			name = WebMonitor;
+			sourceTree = "<group>";
+		};
+		168E6D582323C7B900BB253E /* TCPMonitor */ = {
+			isa = PBXGroup;
+			children = (
+				168E6D6B2323CA3C00BB253E /* CFStream */,
+				168E6D672323C9F600BB253E /* CFSocket */,
+				168E6D632323C9D500BB253E /* SSL */,
+				168E6D5F2323C9AC00BB253E /* DNS */,
+				168E6D592323C82B00BB253E /* FYBaseMonitor.h */,
+				168E6D5A2323C82B00BB253E /* FYBaseMonitor.m */,
+			);
+			path = TCPMonitor;
+			sourceTree = "<group>";
+		};
+		168E6D5F2323C9AC00BB253E /* DNS */ = {
+			isa = PBXGroup;
+			children = (
+				168E6D602323C9CE00BB253E /* FYDNSMonitor.h */,
+				168E6D612323C9CE00BB253E /* FYDNSMonitor.m */,
+			);
+			path = DNS;
+			sourceTree = "<group>";
+		};
+		168E6D632323C9D500BB253E /* SSL */ = {
+			isa = PBXGroup;
+			children = (
+				168E6D642323C9F200BB253E /* FYSSLMonitor.h */,
+				168E6D652323C9F200BB253E /* FYSSLMonitor.m */,
+			);
+			path = SSL;
+			sourceTree = "<group>";
+		};
+		168E6D672323C9F600BB253E /* CFSocket */ = {
+			isa = PBXGroup;
+			children = (
+				168E6D682323CA3600BB253E /* FYSocketMonitor.h */,
+				168E6D692323CA3600BB253E /* FYSocketMonitor.m */,
+			);
+			path = CFSocket;
+			sourceTree = "<group>";
+		};
+		168E6D6B2323CA3C00BB253E /* CFStream */ = {
+			isa = PBXGroup;
+			children = (
+				168E6D6C2323CA5F00BB253E /* FYStreamMonitor.h */,
+				168E6D6D2323CA5F00BB253E /* FYStreamMonitor.m */,
+			);
+			path = CFStream;
+			sourceTree = "<group>";
+		};
+		16927F462322620C00A1D763 = {
+			isa = PBXGroup;
+			children = (
+				166665302322644900A49AF4 /* Monitor */,
+				1666652F2322637C00A49AF4 /* Resources */,
+				1666652E2322636B00A49AF4 /* ThirdLibs */,
+				1666652D2322636100A49AF4 /* Utils */,
+				16927F512322620C00A1D763 /* FYNetworkMonitor */,
+				16927F6A2322620E00A1D763 /* FYNetworkMonitorTests */,
+				16927F752322620E00A1D763 /* FYNetworkMonitorUITests */,
+				16927F502322620C00A1D763 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		16927F502322620C00A1D763 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				16927F4F2322620C00A1D763 /* FYNetworkMonitor.app */,
+				16927F672322620E00A1D763 /* FYNetworkMonitorTests.xctest */,
+				16927F722322620E00A1D763 /* FYNetworkMonitorUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		16927F512322620C00A1D763 /* FYNetworkMonitor */ = {
+			isa = PBXGroup;
+			children = (
+				16927F522322620C00A1D763 /* AppDelegate.h */,
+				16927F532322620C00A1D763 /* AppDelegate.m */,
+				16927F552322620C00A1D763 /* ViewController.h */,
+				16927F562322620C00A1D763 /* ViewController.m */,
+				16927F582322620C00A1D763 /* Main.storyboard */,
+				16927F5B2322620E00A1D763 /* Assets.xcassets */,
+				16927F5D2322620E00A1D763 /* LaunchScreen.storyboard */,
+				16927F602322620E00A1D763 /* Info.plist */,
+				16927F612322620E00A1D763 /* main.m */,
+			);
+			path = FYNetworkMonitor;
+			sourceTree = "<group>";
+		};
+		16927F6A2322620E00A1D763 /* FYNetworkMonitorTests */ = {
+			isa = PBXGroup;
+			children = (
+				16927F6B2322620E00A1D763 /* FYNetworkMonitorTests.m */,
+				16927F6D2322620E00A1D763 /* Info.plist */,
+			);
+			path = FYNetworkMonitorTests;
+			sourceTree = "<group>";
+		};
+		16927F752322620E00A1D763 /* FYNetworkMonitorUITests */ = {
+			isa = PBXGroup;
+			children = (
+				16927F762322620E00A1D763 /* FYNetworkMonitorUITests.m */,
+				16927F782322620E00A1D763 /* Info.plist */,
+			);
+			path = FYNetworkMonitorUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		16927F4E2322620C00A1D763 /* FYNetworkMonitor */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 16927F7B2322620E00A1D763 /* Build configuration list for PBXNativeTarget "FYNetworkMonitor" */;
+			buildPhases = (
+				16927F4B2322620C00A1D763 /* Sources */,
+				16927F4C2322620C00A1D763 /* Frameworks */,
+				16927F4D2322620C00A1D763 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = FYNetworkMonitor;
+			productName = FYNetworkMonitor;
+			productReference = 16927F4F2322620C00A1D763 /* FYNetworkMonitor.app */;
+			productType = "com.apple.product-type.application";
+		};
+		16927F662322620E00A1D763 /* FYNetworkMonitorTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 16927F7E2322620E00A1D763 /* Build configuration list for PBXNativeTarget "FYNetworkMonitorTests" */;
+			buildPhases = (
+				16927F632322620E00A1D763 /* Sources */,
+				16927F642322620E00A1D763 /* Frameworks */,
+				16927F652322620E00A1D763 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				16927F692322620E00A1D763 /* PBXTargetDependency */,
+			);
+			name = FYNetworkMonitorTests;
+			productName = FYNetworkMonitorTests;
+			productReference = 16927F672322620E00A1D763 /* FYNetworkMonitorTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		16927F712322620E00A1D763 /* FYNetworkMonitorUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 16927F812322620E00A1D763 /* Build configuration list for PBXNativeTarget "FYNetworkMonitorUITests" */;
+			buildPhases = (
+				16927F6E2322620E00A1D763 /* Sources */,
+				16927F6F2322620E00A1D763 /* Frameworks */,
+				16927F702322620E00A1D763 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				16927F742322620E00A1D763 /* PBXTargetDependency */,
+			);
+			name = FYNetworkMonitorUITests;
+			productName = FYNetworkMonitorUITests;
+			productReference = 16927F722322620E00A1D763 /* FYNetworkMonitorUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		16927F472322620C00A1D763 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1020;
+				ORGANIZATIONNAME = xuehu;
+				TargetAttributes = {
+					16927F4E2322620C00A1D763 = {
+						CreatedOnToolsVersion = 10.2.1;
+					};
+					16927F662322620E00A1D763 = {
+						CreatedOnToolsVersion = 10.2.1;
+						TestTargetID = 16927F4E2322620C00A1D763;
+					};
+					16927F712322620E00A1D763 = {
+						CreatedOnToolsVersion = 10.2.1;
+						TestTargetID = 16927F4E2322620C00A1D763;
+					};
+				};
+			};
+			buildConfigurationList = 16927F4A2322620C00A1D763 /* Build configuration list for PBXProject "FYNetworkMonitor" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 16927F462322620C00A1D763;
+			productRefGroup = 16927F502322620C00A1D763 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				16927F4E2322620C00A1D763 /* FYNetworkMonitor */,
+				16927F662322620E00A1D763 /* FYNetworkMonitorTests */,
+				16927F712322620E00A1D763 /* FYNetworkMonitorUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		16927F4D2322620C00A1D763 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				16927F5F2322620E00A1D763 /* LaunchScreen.storyboard in Resources */,
+				16927F5C2322620E00A1D763 /* Assets.xcassets in Resources */,
+				16927F5A2322620C00A1D763 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		16927F652322620E00A1D763 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		16927F702322620E00A1D763 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		16927F4B2322620C00A1D763 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				168E6D6E2323CA5F00BB253E /* FYStreamMonitor.m in Sources */,
+				1666653B232270F700A49AF4 /* NSURLSession+Monitor.m in Sources */,
+				166665382322678300A49AF4 /* NSURLConnection+Monitor.m in Sources */,
+				16666535232264BE00A49AF4 /* FYDelegateProxy.m in Sources */,
+				168E6D572323BC4F00BB253E /* UIWebView+Monitor.m in Sources */,
+				168E6D6A2323CA3600BB253E /* FYSocketMonitor.m in Sources */,
+				168E6D5E2323C89E00BB253E /* fishhook.c in Sources */,
+				168E6D5B2323C82B00BB253E /* FYBaseMonitor.m in Sources */,
+				168E6D662323C9F200BB253E /* FYSSLMonitor.m in Sources */,
+				16927F572322620C00A1D763 /* ViewController.m in Sources */,
+				168E6D622323C9CE00BB253E /* FYDNSMonitor.m in Sources */,
+				16927F622322620E00A1D763 /* main.m in Sources */,
+				16927F542322620C00A1D763 /* AppDelegate.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		16927F632322620E00A1D763 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				16927F6C2322620E00A1D763 /* FYNetworkMonitorTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		16927F6E2322620E00A1D763 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				16927F772322620E00A1D763 /* FYNetworkMonitorUITests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		16927F692322620E00A1D763 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 16927F4E2322620C00A1D763 /* FYNetworkMonitor */;
+			targetProxy = 16927F682322620E00A1D763 /* PBXContainerItemProxy */;
+		};
+		16927F742322620E00A1D763 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 16927F4E2322620C00A1D763 /* FYNetworkMonitor */;
+			targetProxy = 16927F732322620E00A1D763 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		16927F582322620C00A1D763 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				16927F592322620C00A1D763 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		16927F5D2322620E00A1D763 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				16927F5E2322620E00A1D763 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		16927F792322620E00A1D763 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.2;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		16927F7A2322620E00A1D763 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		16927F7C2322620E00A1D763 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = FYNetworkMonitor/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.xuehu.jack.FYNetworkMonitor;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		16927F7D2322620E00A1D763 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = FYNetworkMonitor/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.xuehu.jack.FYNetworkMonitor;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		16927F7F2322620E00A1D763 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = FYNetworkMonitorTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.xuehu.jack.FYNetworkMonitorTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FYNetworkMonitor.app/FYNetworkMonitor";
+			};
+			name = Debug;
+		};
+		16927F802322620E00A1D763 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = FYNetworkMonitorTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.xuehu.jack.FYNetworkMonitorTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FYNetworkMonitor.app/FYNetworkMonitor";
+			};
+			name = Release;
+		};
+		16927F822322620E00A1D763 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = FYNetworkMonitorUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.xuehu.jack.FYNetworkMonitorUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = FYNetworkMonitor;
+			};
+			name = Debug;
+		};
+		16927F832322620E00A1D763 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = FYNetworkMonitorUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.xuehu.jack.FYNetworkMonitorUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = FYNetworkMonitor;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		16927F4A2322620C00A1D763 /* Build configuration list for PBXProject "FYNetworkMonitor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				16927F792322620E00A1D763 /* Debug */,
+				16927F7A2322620E00A1D763 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		16927F7B2322620E00A1D763 /* Build configuration list for PBXNativeTarget "FYNetworkMonitor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				16927F7C2322620E00A1D763 /* Debug */,
+				16927F7D2322620E00A1D763 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		16927F7E2322620E00A1D763 /* Build configuration list for PBXNativeTarget "FYNetworkMonitorTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				16927F7F2322620E00A1D763 /* Debug */,
+				16927F802322620E00A1D763 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		16927F812322620E00A1D763 /* Build configuration list for PBXNativeTarget "FYNetworkMonitorUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				16927F822322620E00A1D763 /* Debug */,
+				16927F832322620E00A1D763 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 16927F472322620C00A1D763 /* Project object */;
+}

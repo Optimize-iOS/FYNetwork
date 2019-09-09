@@ -17,6 +17,7 @@
 		168E6D662323C9F200BB253E /* FYSSLMonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = 168E6D652323C9F200BB253E /* FYSSLMonitor.m */; };
 		168E6D6A2323CA3600BB253E /* FYSocketMonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = 168E6D692323CA3600BB253E /* FYSocketMonitor.m */; };
 		168E6D6E2323CA5F00BB253E /* FYStreamMonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = 168E6D6D2323CA5F00BB253E /* FYStreamMonitor.m */; };
+		168E6D722324B48800BB253E /* FYScoketMonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = 168E6D712324B48800BB253E /* FYScoketMonitor.m */; };
 		16927F542322620C00A1D763 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 16927F532322620C00A1D763 /* AppDelegate.m */; };
 		16927F572322620C00A1D763 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 16927F562322620C00A1D763 /* ViewController.m */; };
 		16927F5A2322620C00A1D763 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 16927F582322620C00A1D763 /* Main.storyboard */; };
@@ -65,6 +66,8 @@
 		168E6D692323CA3600BB253E /* FYSocketMonitor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FYSocketMonitor.m; sourceTree = "<group>"; };
 		168E6D6C2323CA5F00BB253E /* FYStreamMonitor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FYStreamMonitor.h; sourceTree = "<group>"; };
 		168E6D6D2323CA5F00BB253E /* FYStreamMonitor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FYStreamMonitor.m; sourceTree = "<group>"; };
+		168E6D702324B48800BB253E /* FYScoketMonitor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FYScoketMonitor.h; sourceTree = "<group>"; };
+		168E6D712324B48800BB253E /* FYScoketMonitor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FYScoketMonitor.m; sourceTree = "<group>"; };
 		16927F4F2322620C00A1D763 /* FYNetworkMonitor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FYNetworkMonitor.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		16927F522322620C00A1D763 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		16927F532322620C00A1D763 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -174,6 +177,7 @@
 		168E6D582323C7B900BB253E /* TCPMonitor */ = {
 			isa = PBXGroup;
 			children = (
+				168E6D6F2324B44800BB253E /* Socket */,
 				168E6D6B2323CA3C00BB253E /* CFStream */,
 				168E6D672323C9F600BB253E /* CFSocket */,
 				168E6D632323C9D500BB253E /* SSL */,
@@ -218,6 +222,15 @@
 				168E6D6D2323CA5F00BB253E /* FYStreamMonitor.m */,
 			);
 			path = CFStream;
+			sourceTree = "<group>";
+		};
+		168E6D6F2324B44800BB253E /* Socket */ = {
+			isa = PBXGroup;
+			children = (
+				168E6D702324B48800BB253E /* FYScoketMonitor.h */,
+				168E6D712324B48800BB253E /* FYScoketMonitor.m */,
+			);
+			path = Socket;
 			sourceTree = "<group>";
 		};
 		16927F462322620C00A1D763 = {
@@ -420,6 +433,7 @@
 				16927F572322620C00A1D763 /* ViewController.m in Sources */,
 				168E6D622323C9CE00BB253E /* FYDNSMonitor.m in Sources */,
 				16927F622322620E00A1D763 /* main.m in Sources */,
+				168E6D722324B48800BB253E /* FYScoketMonitor.m in Sources */,
 				16927F542322620C00A1D763 /* AppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

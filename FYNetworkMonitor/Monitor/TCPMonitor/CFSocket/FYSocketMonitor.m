@@ -13,7 +13,7 @@ CFSocketError (*original_CFSocketConnectToAddress)(CFSocketRef s, CFDataRef addr
 
 CFSocketError (*original_CFSocketSendData)(CFSocketRef s, CFDataRef address, CFDataRef data, CFTimeInterval timeout);
 
-@implementation FYSocketMonitor
+@implementation FYCFSocketMonitor
 
 + (void)load {
     rcd_rebind_symbols((struct rcd_rebinding[2]) {

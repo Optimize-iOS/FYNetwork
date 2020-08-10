@@ -55,6 +55,7 @@
     return [self initWithBaseURL:nil];
 }
 
+///网络请求中初始化 URL 的请求地址
 - (instancetype)initWithBaseURL:(NSURL *)url {
     return [self initWithBaseURL:url sessionConfiguration:nil];
 }
@@ -66,18 +67,22 @@
 - (instancetype)initWithBaseURL:(NSURL *)url
            sessionConfiguration:(NSURLSessionConfiguration *)configuration
 {
+    ///设置 sessionConfiration
     self = [super initWithSessionConfiguration:configuration];
     if (!self) {
         return nil;
     }
 
     // Ensure terminal slash for baseURL path, so that NSURL +URLWithString:relativeToURL: works as expected
+    /// 判断 URL 是否合法 
     if ([[url path] length] > 0 && ![[url absoluteString] hasSuffix:@"/"]) {
         url = [url URLByAppendingPathComponent:@""];
     }
 
     self.baseURL = url;
 
+    ///在 request 和 response 请求和响应过程中都采用序列化处理
+    ///初始化在 request 和 response 的序列化
     self.requestSerializer = [AFHTTPRequestSerializer serializer];
     self.responseSerializer = [AFJSONResponseSerializer serializer];
 
@@ -86,12 +91,14 @@
 
 #pragma mark -
 
+/// 设置请求 序列化
 - (void)setRequestSerializer:(AFHTTPRequestSerializer <AFURLRequestSerialization> *)requestSerializer {
     NSParameterAssert(requestSerializer);
 
     _requestSerializer = requestSerializer;
 }
 
+/// 设置响应 序列化
 - (void)setResponseSerializer:(AFHTTPResponseSerializer <AFURLResponseSerialization> *)responseSerializer {
     NSParameterAssert(responseSerializer);
 
@@ -100,6 +107,7 @@
 
 @dynamic securityPolicy;
 
+/// 设置网络请求身份验证 或者是网络请求校验
 - (void)setSecurityPolicy:(AFSecurityPolicy *)securityPolicy {
     if (securityPolicy.SSLPinningMode != AFSSLPinningModeNone && ![self.baseURL.scheme isEqualToString:@"https"]) {
         NSString *pinningMode = @"Unknown Pinning Mode";
@@ -117,6 +125,13 @@
 
 #pragma mark -
 
+///  AF 网络加载实现过程
+/// @param URLString <#URLString description#>
+/// @param parameters <#parameters description#>
+/// @param headers <#headers description#>
+/// @param downloadProgress <#downloadProgress description#>
+/// @param success <#success description#>
+/// @param failure <#failure description#>
 - (NSURLSessionDataTask *)GET:(NSString *)URLString
                    parameters:(nullable id)parameters
                       headers:(nullable NSDictionary <NSString *, NSString *> *)headers
@@ -124,7 +139,7 @@
                       success:(nullable void (^)(NSURLSessionDataTask * _Nonnull, id _Nullable))success
                       failure:(nullable void (^)(NSURLSessionDataTask * _Nullable, NSError * _Nonnull))failure
 {
-    
+    /// 数据下载 
     NSURLSessionDataTask *dataTask = [self dataTaskWithHTTPMethod:@"GET"
                                                         URLString:URLString
                                                        parameters:parameters
@@ -259,10 +274,13 @@
                                          failure:(nullable void (^)(NSURLSessionDataTask * _Nullable task, NSError *error))failure
 {
     NSError *serializationError = nil;
+    ///TODO
     NSMutableURLRequest *request = [self.requestSerializer requestWithMethod:method URLString:[[NSURL URLWithString:URLString relativeToURL:self.baseURL] absoluteString] parameters:parameters error:&serializationError];
+    ///装配 request 的 header 的参数类型
     for (NSString *headerField in headers.keyEnumerator) {
         [request setValue:headers[headerField] forHTTPHeaderField:headerField];
     }
+    ///序列化 request 失败
     if (serializationError) {
         if (failure) {
             dispatch_async(self.completionQueue ?: dispatch_get_main_queue(), ^{

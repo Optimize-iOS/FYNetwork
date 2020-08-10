@@ -34,6 +34,8 @@ FOUNDATION_EXPORT id AFJSONObjectByRemovingKeysWithNullValues(id JSONObject, NSJ
 
  For example, a JSON response serializer may check for an acceptable status code (`2XX` range) and content type (`application/json`), decoding a valid JSON response into an object.
  */
+///准守基本的方法协议 NSObject | NSSecureCoding | NSCopying  实现安全编码和 Copy 对象
+///采用以 delegate 来实现
 @protocol AFURLResponseSerialization <NSObject, NSSecureCoding, NSCopying>
 
 /**
@@ -52,6 +54,15 @@ FOUNDATION_EXPORT id AFJSONObjectByRemovingKeysWithNullValues(id JSONObject, NSJ
 @end
 
 #pragma mark -
+///响应过程的序列化过程继承关系
+//
+//AFHTTPResponseSerializer
+//AFJSONResponseSerializer           JSON
+//AFXMLParserResponseSerializer      XML
+//AFXMLDocumentResponseSerializer
+//AFPropertyListResponseSerializer   Plist
+//AFImageResponseSerializer          Image
+//AFCompoundResponseSerializer       复合
 
 /**
  `AFHTTPResponseSerializer` conforms to the `AFURLRequestSerialization` & `AFURLResponseSerialization` protocols, offering a concrete base implementation of query string / URL form-encoded parameter serialization and default request headers, as well as response status code and content type validation.

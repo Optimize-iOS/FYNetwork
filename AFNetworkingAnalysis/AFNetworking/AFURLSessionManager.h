@@ -92,6 +92,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  The managed session.
+ 进行生成各种业务需要的 Task 下载任务
  */
 @property (readonly, nonatomic, strong) NSURLSession *session;
 
@@ -113,6 +114,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  The security policy used by created session to evaluate server trust for secure connections. `AFURLSessionManager` uses the `defaultPolicy` unless otherwise specified.
+ 连接安全验证
  */
 @property (nonatomic, strong) AFSecurityPolicy *securityPolicy;
 
@@ -123,6 +125,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  The network reachability manager. `AFURLSessionManager` uses the `sharedManager` by default.
+ 验证网络状态
  */
 @property (readwrite, nonatomic, strong) AFNetworkReachabilityManager *reachabilityManager;
 #endif
@@ -305,6 +308,7 @@ NS_ASSUME_NONNULL_BEGIN
 ///-----------------------------------------
 
 /**
+///TODO
  Sets a block to be executed when the managed session becomes invalid, as handled by the `NSURLSessionDelegate` method `URLSession:didBecomeInvalidWithError:`.
 
  @param block A block object to be executed when the managed session becomes invalid. The block has no return value, and takes two arguments: the session, and the error related to the cause of invalidation.

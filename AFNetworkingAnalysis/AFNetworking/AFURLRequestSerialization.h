@@ -71,6 +71,7 @@ FOUNDATION_EXPORT NSString * AFQueryStringFromParameters(NSDictionary *parameter
 
  @return A serialized request.
  */
+///
 - (nullable NSURLRequest *)requestBySerializingRequest:(NSURLRequest *)request
                                withParameters:(nullable id)parameters
                                         error:(NSError * _Nullable __autoreleasing *)error NS_SWIFT_NOTHROW;
@@ -78,6 +79,11 @@ FOUNDATION_EXPORT NSString * AFQueryStringFromParameters(NSDictionary *parameter
 @end
 
 #pragma mark -
+///请求过程中序列化继承关系
+//
+//AFHTTPRequestSerializer
+//AFJSONRequestSerializer
+//AFPropertyListRequestSerializer
 
 /**
 
@@ -97,6 +103,7 @@ typedef NS_ENUM(NSUInteger, AFHTTPRequestQueryStringSerializationStyle) {
 
 /**
  The string encoding used to serialize parameters. `NSUTF8StringEncoding` by default.
+ 字符编码采用 UTF-8 的编码方式
  */
 @property (nonatomic, assign) NSStringEncoding stringEncoding;
 

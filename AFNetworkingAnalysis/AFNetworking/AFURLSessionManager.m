@@ -86,7 +86,9 @@ typedef void (^AFURLSessionTaskProgressBlock)(NSProgress *);
 typedef void (^AFURLSessionTaskCompletionHandler)(NSURLResponse *response, id responseObject, NSError *error);
 
 #pragma mark -
-
+/// 根据下载的过程中 上传或者下载 进度 process
+/// 来实现进度管理
+///TODO
 @interface AFURLSessionManagerTaskDelegate : NSObject <NSURLSessionTaskDelegate, NSURLSessionDataDelegate, NSURLSessionDownloadDelegate>
 - (instancetype)initWithTask:(NSURLSessionTask *)task;
 @property (nonatomic, weak) AFURLSessionManager *manager;
@@ -478,26 +480,33 @@ static NSString * const AFNSURLSessionTaskDidSuspendNotification = @"com.alamofi
     return [self initWithSessionConfiguration:nil];
 }
 
+///  初始化在 URLSessionManager 默认 URLSessionConfiguration 设置
+/// @param configuration <#configuration description#>
 - (instancetype)initWithSessionConfiguration:(NSURLSessionConfiguration *)configuration {
     self = [super init];
     if (!self) {
         return nil;
     }
 
+    /// 设置在网络请求过程中 configuration 的配置
     if (!configuration) {
         configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
     }
 
     self.sessionConfiguration = configuration;
-
+    
+    ///初始化请求队列 | 设置队列并发 macx count
     self.operationQueue = [[NSOperationQueue alloc] init];
     self.operationQueue.maxConcurrentOperationCount = 1;
 
+    ///设置序列化响应
     self.responseSerializer = [AFJSONResponseSerializer serializer];
 
+    ///负责网络请求身份认证
     self.securityPolicy = [AFSecurityPolicy defaultPolicy];
 
 #if !TARGET_OS_WATCH
+    ///查看网络在连接时连接状态
     self.reachabilityManager = [AFNetworkReachabilityManager sharedManager];
 #endif
 
@@ -530,8 +539,9 @@ static NSString * const AFNSURLSessionTaskDidSuspendNotification = @"com.alamofi
 #pragma mark -
 
 - (NSURLSession *)session {
-    
+    ///递归锁的机制 来初始化 Session 的目标 
     @synchronized (self) {
+        ///设置 Session 的基本配置，下载过程中委托代理和任务下载的队列
         if (!_session) {
             _session = [NSURLSession sessionWithConfiguration:self.sessionConfiguration delegate:self delegateQueue:self.operationQueue];
         }
@@ -589,6 +599,7 @@ static NSString * const AFNSURLSessionTaskDidSuspendNotification = @"com.alamofi
 
     [self.lock lock];
     self.mutableTaskDelegatesKeyedByTaskIdentifier[@(task.taskIdentifier)] = delegate;
+    ///添加对应的 Task 的暂停和重启的状态
     [self addNotificationObserverForTask:task];
     [self.lock unlock];
 }
@@ -598,6 +609,8 @@ static NSString * const AFNSURLSessionTaskDidSuspendNotification = @"com.alamofi
               downloadProgress:(nullable void (^)(NSProgress *downloadProgress)) downloadProgressBlock
              completionHandler:(void (^)(NSURLResponse *response, id responseObject, NSError *error))completionHandler
 {
+    ///TODO 这一步添加协议委托主要是想做什么？？？
+    /// 把 task 转换为 TaskDelegate 类型，然后保存在 session manager 中字典中
     AFURLSessionManagerTaskDelegate *delegate = [[AFURLSessionManagerTaskDelegate alloc] initWithTask:dataTask];
     delegate.manager = self;
     delegate.completionHandler = completionHandler;
@@ -734,8 +747,10 @@ static NSString * const AFNSURLSessionTaskDidSuspendNotification = @"com.alamofi
                              downloadProgress:(nullable void (^)(NSProgress *downloadProgress)) downloadProgressBlock
                             completionHandler:(nullable void (^)(NSURLResponse *response, id _Nullable responseObject,  NSError * _Nullable error))completionHandler {
 
+    ///获取当前的任务队列  
     NSURLSessionDataTask *dataTask = [self.session dataTaskWithRequest:request];
 
+    ///保存当前 dataTask 值到本地 dic 字典中
     [self addDelegateForDataTask:dataTask uploadProgress:uploadProgressBlock downloadProgress:downloadProgressBlock completionHandler:completionHandler];
 
     return dataTask;
